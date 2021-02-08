@@ -1,4 +1,30 @@
 {
+	"World Explorations": {
+    	"Cape Town Envivo Lungo": {
+    		"caffeine_mg": 110,
+    		"image_url": "https://www.nespresso.com/ecom/medias/sys_master/public/13702032228382/C-0685-Responsive-Standard-2000x2000-min.png"
+    	},
+    	"Stockholm Fortissio Lungo": {
+			"caffeine_mg": 80,
+    		"image_url": "https://www.nespresso.com/ecom/medias/sys_master/public/13703618363422/C-0686-Responsive-Standard-2000x2000.png"
+    	},
+    	"Vienna Linizio Lungo": {
+    		"caffeine_mg": 75,
+    		"image_url": "https://www.nespresso.com/ecom/medias/sys_master/public/13703691468830/C-0687-Responsive-Standard-2000x2000.png"
+    	},
+    	"Tokyo Vivalto Lungo": {
+    		"caffeine_mg": 82,
+    		"image_url": "https://www.nespresso.com/ecom/medias/sys_master/public/13753032867870/Responsive-Standard-2000x2000.png"
+    	},
+    	"Buenos Aires Lungo": {
+    		"caffeine_mg": 104,
+    		"image_url": "https://www.nespresso.com/ecom/medias/sys_master/public/13703698251806/C-0689-Responsive-Standard-2000x2000.png"
+    	},
+    	"Shanghai Lungo" : {
+    		"caffeine_mg": 82,
+    		"image_url": "https://www.nespresso.com/ecom/medias/sys_master/public/13704135573534/C-0690-Responsive-Standard-2000x2000.png"
+    	}
+    },
     "Origins": {
         "Aged Sumatra Limited Edition": {
             "caffeine_mg": 68,
