@@ -1,0 +1,31 @@
+[project]
+name = "capsule-caffeine"
+version = "1.1.0"
+description = "Scrape the caffeine content of Nespresso capsules"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.12",
+    "requests>=2.32",
+]
+
+[project.scripts]
+capsule-caffeine = "capsule_caffeine.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
