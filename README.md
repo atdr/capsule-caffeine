@@ -52,6 +52,10 @@ Scraped data is a build output and is not committed to this repository. Tests ru
 
 See this Gist for [a sample of the JSON](https://gist.github.com/atdr/5212cdd48e77021c0786561fb2063c86) found on the Nespresso site if you're interested in extending the scraper.
 
+## Releases
+
+The scraper is versioned by [release-please](https://github.com/googleapis/release-please) from conventional commit messages, which also write `CHANGELOG.md`. Don't edit either by hand. Data is not versioned with the code.
+
 ## Thanks
 
 To everyone who kept this going in their forks: [DEEJCUK](https://github.com/DEEJCUK/capsule-caffeine) for Vertuo support and a sturdier standalone scraper, which inspired this one; [edspc](https://github.com/edspc/capsule-caffeine) and [yuejunfeng0909](https://github.com/yuejunfeng0909/capsule-caffeine) for data refreshes and Singapore support; and [wiebecommajonas](https://github.com/wiebecommajonas) and [indiamai](https://github.com/indiamai) for their contributions here.
