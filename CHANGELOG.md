@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.1](https://github.com/atdr/capsule-caffeine/compare/v2.0.0...v2.0.1) (2026-10-24)
+
+
+### Bug Fixes
+
+* **data:** drop promotions that only repeat other ranges ([#13](https://github.com/atdr/capsule-caffeine/issues/13)) ([9206679](https://github.com/atdr/capsule-caffeine/commit/92066794df90499a99e3bd966b147a5f37b7d3b6))
+
+
+### Documentation
+
+* link the v2 Shortcut and mark the v1 ones as legacy ([#15](https://github.com/atdr/capsule-caffeine/issues/15)) ([f848d29](https://github.com/atdr/capsule-caffeine/commit/f848d293d0c93959f2162f6a8c219641b5c9db5e))
+
 ## [2.0.0](https://github.com/atdr/capsule-caffeine/compare/v1.1.0...v2.0.0) (2026-10-24)
 
 
