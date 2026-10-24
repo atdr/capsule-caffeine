@@ -97,14 +97,32 @@ def home_page(markets: dict[str, dict]) -> str:
     return page("Capsule caffeine", body)
 
 
+def remove_stale_markets(out: Path, current) -> None:
+    """Drop markets left from an earlier build, so a deploy can't serve old data.
+
+    Only directories holding nothing but this module's own output are removed.
+    """
+    generated = {"capsules.json", INDEX}
+    for market in out.iterdir():
+        if not market.is_dir() or market.name in current:
+            continue
+        contents = list(market.iterdir())
+        if contents and {f.name for f in contents} <= generated:
+            for f in contents:
+                f.unlink()
+            market.rmdir()
+
+
 def build_site(builds: dict[str, Path], out: Path) -> None:
     """Write <out>/<name>/{capsules.json,index.html} per build, plus a home page and the schema."""
     markets = {}
     for name, path in builds.items():
         markets[name] = json.loads(path.read_text(encoding="utf-8"))
         (out / name).mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(path, out / name / path.name)
+        if not (out / name / path.name).exists() or not path.samefile(out / name / path.name):
+            shutil.copyfile(path, out / name / path.name)
         (out / name / INDEX).write_text(market_page(name, markets[name]), encoding="utf-8")
+    remove_stale_markets(out, markets.keys())
     (out / SCHEMA).write_text(
         files("capsule_caffeine").joinpath(SCHEMA).read_text(encoding="utf-8"), encoding="utf-8"
     )

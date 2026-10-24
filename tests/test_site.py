@@ -30,3 +30,28 @@ def test_site_builds_from_a_build(original_tw, tmp_path):
 
 def test_site_needs_a_build(tmp_path):
     assert main(["site", str(tmp_path), "-o", str(tmp_path / "site")]) == 1
+    assert main(["site", str(tmp_path / "missing"), "-o", str(tmp_path / "site")]) == 1
+
+
+def test_site_rebuild_drops_markets_no_longer_built(original_tw, tmp_path):
+    build, site = tmp_path / "dist", tmp_path / "site"
+    doc = market_document("tw", scrape_market(original_tw, "tw", ["Original"]), NOW)
+    for market in ("tw", "sg"):
+        (build / market).mkdir(parents=True)
+        (build / market / "capsules.json").write_text(json.dumps(doc), encoding="utf-8")
+    (site / "notes").mkdir(parents=True)
+    (site / "notes" / "keep.txt").write_text("not ours")
+    assert main(["site", str(build), "-o", str(site)]) == 0
+
+    (build / "sg" / "capsules.json").unlink()
+    assert main(["site", str(build), "-o", str(site)]) == 0
+
+    assert sorted(p.name for p in site.iterdir()) == [
+        "capsules.schema.json",
+        "index.html",
+        "notes",
+        "tw",
+    ]
+    # Building into the input directory leaves its files in place.
+    assert main(["site", str(build), "-o", str(build)]) == 0
+    assert json.loads((build / "tw" / "capsules.json").read_text()) == doc
