@@ -24,8 +24,31 @@ def test_market_document_keeps_market_ranges(original_tw):
 
     assert schema_problems(doc) == []
     assert doc["source"]["locales"] == ["tw"]
-    assert set(doc["lines"]["Original"]) == {"Espresso", "Special Offer"}
+    # Special Offer is a promotion, and Ristretto is listed under Espresso too.
+    assert set(doc["lines"]["Original"]) == {"Espresso"}
     assert doc["lines"]["Original"]["Espresso"]["Ristretto"]["caffeine_mg"] == 120
+
+
+def test_market_document_drops_only_promotions_that_repeat_other_ranges():
+    range_map = {"Original": {"offer": None, "autumn": None, "espresso": "Espresso"}}
+    market = {
+        "Original": [
+            Range("espresso", "Espresso", [pod("Ristretto")]),
+            Range("offer", "Special Offer", [pod("Ristretto")]),
+            Range("autumn", "Autumn Selection", [pod("Ristretto"), pod("Maple")]),
+            # Only in promotions: neither may vanish.
+            Range("offer", "Special Offer", [pod("Pecan")]),
+            Range("autumn", "Autumn Selection", [pod("Pecan")]),
+        ]
+    }
+
+    lines = market_document("tw", market, NOW, range_map)["lines"]["Original"]
+
+    assert {r: list(p) for r, p in lines.items()} == {
+        "Espresso": ["Ristretto"],
+        "Autumn Selection": ["Ristretto", "Maple", "Pecan"],
+        "Special Offer": ["Pecan"],
+    }
 
 
 def test_pod_key_ignores_case_marks_and_box_size():
