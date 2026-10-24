@@ -1,0 +1,130 @@
+name: data
+
+on:
+  schedule:
+    - cron: "17 5 * * 1" # Mondays
+  # release-please dispatches this with force after a code release, since releases
+  # made with GITHUB_TOKEN don't trigger `release` events.
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Publish even if the data is unchanged
+        type: boolean
+        default: false
+
+concurrency:
+  group: data
+  cancel-in-progress: false
+
+env:
+  PAGES_URL: https://atdr.github.io/capsule-caffeine
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
+      publish: ${{ steps.diff.outputs.publish }}
+      ref: ${{ steps.ref.outputs.ref }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check out the latest code release
+        id: ref
+        run: |
+          # Data is built by released code only; v1.0 and v1.1 predate the package.
+          ref=$(git tag --list 'v*.*.*' --sort=-v:refname | head -n 1)
+          ref=${ref:-$GITHUB_SHA}
+          git checkout --quiet "$ref"
+          echo "ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "Building with $ref"
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - name: Scrape
+        run: uv run capsule-caffeine -v scrape -o dist
+      - name: Compare with the live site
+        id: diff
+        env:
+          FORCE: ${{ inputs.force }}
+        run: |
+          for file in dist/*/capsules.json; do
+            market=$(basename "$(dirname "$file")")
+            mkdir -p "live/$market"
+            # Transport errors fail the step (bash -e). Only a 404, from a first run or a new
+            # market, counts as missing; anything else must not pass for a changed market.
+            code=$(curl --silent --show-error --location --retry 3 -w '%{http_code}' \
+              -o "live/$market/capsules.json" "$PAGES_URL/$market/capsules.json")
+            case "$code" in
+              200) ;;
+              404) rm -rf "live/$market" ;;
+              *) echo "::error::$PAGES_URL/$market/capsules.json returned HTTP $code"; exit 1 ;;
+            esac
+          done
+          status=0
+          uv run capsule-caffeine diff live dist > notes.md || status=$?
+          [ "$status" -le 1 ] || exit "$status"
+          changed=$([ "$status" -eq 1 ] && echo true || echo false)
+          publish=$([ "$changed" = true ] || [ "$FORCE" = true ] && echo true || echo false)
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+          cat notes.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Build the site
+        if: steps.diff.outputs.publish == 'true'
+        run: uv run capsule-caffeine site dist -o site
+      - if: steps.diff.outputs.publish == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - if: steps.diff.outputs.changed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot
+          path: |
+            dist
+            notes.md
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  snapshot:
+    needs: [build, deploy]
+    if: needs.build.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: snapshot
+      - name: Create a dated data release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          REF: ${{ needs.build.outputs.ref }}
+        run: |
+          tag="data-$(date -u +%F)"
+          for file in dist/*/capsules.json; do
+            cp "$file" "$(basename "$(dirname "$file")")-capsules.json"
+          done
+          if gh release view "$tag" > /dev/null 2>&1; then
+            gh release upload "$tag" ./*-capsules.json --clobber
+            gh release edit "$tag" --notes-file notes.md
+          else
+            # Never "latest": that stays the newest code release.
+            gh release create "$tag" ./*-capsules.json --target "$REF" --latest=false \
+              --title "Data $(date -u +%F)" --notes-file notes.md
+          fi

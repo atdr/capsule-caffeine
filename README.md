@@ -52,6 +52,15 @@ Scraped data is a build output and is not committed to this repository. Tests ru
 
 See this Gist for [a sample of the JSON](https://gist.github.com/atdr/5212cdd48e77021c0786561fb2063c86) found on the Nespresso site if you're interested in extending the scraper.
 
+## Data
+
+A [weekly workflow](.github/workflows/data.yml) scrapes with the latest code release and, when the data has changed, publishes it to GitHub Pages:
+
+- `https://atdr.github.io/capsule-caffeine/<market>/capsules.json` (`tw`, `sg`, `merged`) always holds the latest data, with a readable table at `https://atdr.github.io/capsule-caffeine/<market>/`.
+- Each change is also kept as a `data-YYYY-MM-DD` release with the files attached as `<market>-capsules.json`, for anyone who wants to pin a version. These are never marked as the latest release.
+
+A new code release rebuilds the site. Pages has to be set to deploy from GitHub Actions once: `gh api -X POST repos/atdr/capsule-caffeine/pages -f build_type=workflow`.
+
 ## Releases
 
 The scraper is versioned by [release-please](https://github.com/googleapis/release-please) from conventional commit messages, which also write `CHANGELOG.md`. Don't edit either by hand. Data is not versioned with the code.
