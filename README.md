@@ -2,11 +2,13 @@
 
 Python web scraper to gather data on the caffeine content of Nespresso pod coffee.
 
-## Shortcuts
+## Shortcut
 
-I made a corresponding Shortcut (links: [iCloud](https://www.icloud.com/shortcuts/4f33796a6ad24dd3aa20773b33eba3a2), [RoutineHub](https://routinehub.co/shortcut/8103/)) to log caffeine directly into the iPhone Health app. In addition, there is an alternative shortcut that allows logging of multiple pods at once, if you are very into your caffeine (link: [iCloud](https://www.icloud.com/shortcuts/dd5f8b82081341c0bc7250667eca1da0)).
+[Nespresso Log](https://www.icloud.com/shortcuts/4d98f10396bc459382d860e7677df1ce) (also on [RoutineHub](https://routinehub.co/shortcut/8103/)) logs a pod's caffeine to the Health app. Pick the machine, range and pod, say how many pods, and it logs the total with a notification showing the pod. When you add it, it asks for a market: `tw` (Taiwan), `sg` (Singapore) or `merged` (both, experimental). It reads the [published data](#data), so it picks up new pods without updating. Run it with a date as input to log a pod after the fact.
 
-These Shortcuts read data pinned to the `v1.1` and `v1.0` tags. They keep working, but their data is no longer updated. A new Shortcut with automatically refreshed data is on the way.
+Pods that Nespresso publishes no caffeine figure for are not logged. If the data ever moves to a new format, the Shortcut asks you to update it rather than logging wrong numbers.
+
+The original Shortcuts ([single pod](https://www.icloud.com/shortcuts/4f33796a6ad24dd3aa20773b33eba3a2), [multiple pods](https://www.icloud.com/shortcuts/dd5f8b82081341c0bc7250667eca1da0)) read data pinned to the `v1.1` and `v1.0` tags. They keep working, but their data is no longer updated.
 
 ## Running the scraper
 
