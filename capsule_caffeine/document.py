@@ -2,7 +2,7 @@
 
 from importlib.metadata import version
 
-from .promotions import LIMITED, is_promotion, load_range_map
+from .promotions import is_promotion, load_range_map
 from .scrape import Pod, Range
 
 SCHEMA_VERSION = 2
@@ -35,23 +35,23 @@ def market_document(
 ) -> dict:
     """One market, keeping its own range names. A pod may sit in several ranges.
 
-    Promotions are left out; a pod listed only under one goes to Limited Edition.
+    A promotion (Special Offer) whose pods all sit in regular ranges only repeats them,
+    so it is left out. Others, such as a seasonal selection, stay as the market has them.
     """
     range_map = load_range_map() if range_map is None else range_map
     lines = {}
     for line, ranges in market.items():
         line_ranges: dict[str, dict] = {}
-        promoted: dict[str, Pod] = {}
+        regular = {
+            pod.name for r in ranges if not is_promotion(line, r.slug, range_map) for pod in r.pods
+        }
         for range_ in ranges:
-            if is_promotion(line, range_.slug, range_map):
-                promoted.update((pod.name, pod) for pod in range_.pods)
+            if is_promotion(line, range_.slug, range_map) and all(
+                pod.name in regular for pod in range_.pods
+            ):
                 continue
             pods = line_ranges.setdefault(range_.name, {})
             for pod in range_.pods:
                 pods.setdefault(pod.name, pod_entry(pod))
-        listed = {name for pods in line_ranges.values() for name in pods}
-        for name, pod in promoted.items():
-            if name not in listed:
-                line_ranges.setdefault(LIMITED, {})[name] = pod_entry(pod)
         lines[line] = line_ranges
     return document(lines, [locale], generated_at)

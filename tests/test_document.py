@@ -29,13 +29,16 @@ def test_market_document_keeps_market_ranges(original_tw):
     assert doc["lines"]["Original"]["Espresso"]["Ristretto"]["caffeine_mg"] == 120
 
 
-def test_market_document_files_promotion_only_pods_as_limited_edition():
-    range_map = {"Original": {"offer": None, "espresso": "Espresso"}}
+def test_market_document_drops_only_promotions_that_repeat_other_ranges():
+    range_map = {"Original": {"offer": None, "autumn": None, "espresso": "Espresso"}}
     market = {
         "Original": [
             Range("espresso", "Espresso", [pod("Ristretto")]),
-            Range("offer", "Special Offer", [pod("Ristretto"), pod("Maple")]),
-            Range("unknown", "Autumn Selection", [pod("Pumpkin")]),
+            Range("offer", "Special Offer", [pod("Ristretto")]),
+            Range("autumn", "Autumn Selection", [pod("Ristretto"), pod("Maple")]),
+            # Only in promotions: neither may vanish.
+            Range("offer", "Special Offer", [pod("Pecan")]),
+            Range("autumn", "Autumn Selection", [pod("Pecan")]),
         ]
     }
 
@@ -43,8 +46,8 @@ def test_market_document_files_promotion_only_pods_as_limited_edition():
 
     assert {r: list(p) for r, p in lines.items()} == {
         "Espresso": ["Ristretto"],
-        "Autumn Selection": ["Pumpkin"],
-        "Limited Edition": ["Maple"],
+        "Autumn Selection": ["Ristretto", "Maple", "Pecan"],
+        "Special Offer": ["Pecan"],
     }
 
 
