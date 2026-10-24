@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "c1c8238e7a10ee3608b7e69206ddfc06556df501",
+  "packages": {
+    ".": {
+      "release-type": "python",
+      "package-name": "capsule-caffeine",
+      "include-component-in-tag": false,
+      "extra-files": [
+        {
+          "type": "toml",
+          "path": "uv.lock",
+          "jsonpath": "$.package[?(@.name.value=='capsule-caffeine')].version"
+        }
+      ]
+    }
+  }
+}
