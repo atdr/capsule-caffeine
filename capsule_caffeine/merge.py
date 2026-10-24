@@ -5,24 +5,18 @@ matched by normalised name and ranges are renamed through `ranges.json`, which m
 each market's range slug to a shared name (null for promotions and assortments).
 """
 
-import json
 import logging
 import re
 from dataclasses import dataclass, field
-from importlib import resources
 
 from .document import document
+from .promotions import LIMITED, load_range_map
 from .scrape import Pod, Range
 
-LIMITED = "Limited Edition"
 BOX_SUFFIX = re.compile(r"\b\d+\s*capsules?\s*box\b")
 NON_WORD = re.compile(r"[^\w+]+")
 
 log = logging.getLogger(__name__)
-
-
-def load_range_map() -> dict[str, dict[str, str | None]]:
-    return json.loads(resources.files(__package__).joinpath("ranges.json").read_text())
 
 
 def pod_key(name: str) -> str:
