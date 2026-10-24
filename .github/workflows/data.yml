@@ -53,9 +53,15 @@ jobs:
           for file in dist/*/capsules.json; do
             market=$(basename "$(dirname "$file")")
             mkdir -p "live/$market"
-            # A market missing from the site (first run, new market) counts as changed.
-            curl --fail --silent --location "$PAGES_URL/$market/capsules.json" \
-              -o "live/$market/capsules.json" || rm -rf "live/$market"
+            # Transport errors fail the step (bash -e). Only a 404, from a first run or a new
+            # market, counts as missing; anything else must not pass for a changed market.
+            code=$(curl --silent --show-error --location --retry 3 -w '%{http_code}' \
+              -o "live/$market/capsules.json" "$PAGES_URL/$market/capsules.json")
+            case "$code" in
+              200) ;;
+              404) rm -rf "live/$market" ;;
+              *) echo "::error::$PAGES_URL/$market/capsules.json returned HTTP $code"; exit 1 ;;
+            esac
           done
           status=0
           uv run capsule-caffeine diff live dist > notes.md || status=$?
