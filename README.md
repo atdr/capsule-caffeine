@@ -13,12 +13,39 @@ These Shortcuts read data pinned to the `v1.1` and `v1.0` tags. They keep workin
 Requires [uv](https://docs.astral.sh/uv/).
 
 ```sh
-uv run capsule-caffeine scrape -v -o capsules.json
+uv run capsule-caffeine -v scrape          # all markets and lines, into dist/
+uv run capsule-caffeine scrape --locale tw --line Vertuo
+uv run capsule-caffeine diff old-dist/ dist/   # release notes; exit 1 when changed
 ```
 
-Options: `--locale` picks the nespresso.com market (default `tw`), `--line` the capsule line (default `original`). Without `-o` the JSON goes to stdout.
+A run writes one `dist/<market>/capsules.json` per market, keeping that market's own ranges. The defaults are `tw` and `sg`, the English-language markets that publish caffeine content. `au`, `hk`, `my` and `nz` run the same site but give no caffeine values; `uk`, `us`, `ca` and `ie` run a different site. With several markets it also writes `dist/merged/capsules.json`. That file is experimental: pods are matched by name across markets, and ranges are renamed through [`ranges.json`](capsule_caffeine/ranges.json). New range slugs show up as warnings and need adding there.
 
-Scraped data is a build output and is not committed to this repository.
+Every file follows [schema 2](capsule_caffeine/capsules.schema.json):
+
+```json
+{
+  "schema": 2,
+  "generated_at": "2026-10-24T12:00:00Z",
+  "scraper": "2.0.0",
+  "source": { "site": "nespresso.com", "language": "en", "locales": ["tw"] },
+  "lines": {
+    "Vertuo": {
+      "Espresso": {
+        "Double Espresso Dolce": {
+          "id": "7034.80",
+          "caffeine_mg": 133,
+          "image_url": "https://www.nespresso.com/ecom/medias/…/320.png",
+          "page_url": "https://www.nespresso.com/tw/en/order/capsules/vertuo/…"
+        }
+      }
+    }
+  }
+}
+```
+
+`caffeine_mg` is `null` when the product page gives no value. Where a page gives a range (sg does, for example "120 – 300mg per cup"), `caffeine_range_mg` holds `[low, high]` and `caffeine_mg` is its midpoint. In the merged file, tw's single figure is preferred. A file that fails the checks (schema, a minimum number of pods per line, at most half missing caffeine) makes the run exit with an error.
+
+Scraped data is a build output and is not committed to this repository. Tests run offline against hand-made pages: `uv run pytest`.
 
 See this Gist for [a sample of the JSON](https://gist.github.com/atdr/5212cdd48e77021c0786561fb2063c86) found on the Nespresso site if you're interested in extending the scraper.
 

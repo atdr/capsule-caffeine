@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://atdr.github.io/capsule-caffeine/capsules.schema.json",
+  "title": "Capsule Caffeine data, schema 2",
+  "type": "object",
+  "required": ["schema", "generated_at", "scraper", "source", "lines"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": 2 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "scraper": { "type": "string", "description": "Version of capsule-caffeine that built this file" },
+    "source": {
+      "type": "object",
+      "required": ["site", "language", "locales"],
+      "properties": {
+        "site": { "type": "string" },
+        "language": { "type": "string" },
+        "locales": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "merged": { "type": "boolean", "description": "Experimental: several markets merged" }
+      }
+    },
+    "lines": {
+      "type": "object",
+      "description": "Machine line (Original, Vertuo, Pro) to ranges",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "description": "Range name to pods",
+        "additionalProperties": {
+          "type": "object",
+          "description": "Pod name to pod",
+          "additionalProperties": { "$ref": "#/$defs/pod" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "pod": {
+      "type": "object",
+      "required": ["caffeine_mg", "image_url", "page_url"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "description": "The market's product id; differs between markets" },
+        "caffeine_mg": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Caffeine per capsule; the midpoint when the page gives a range"
+        },
+        "caffeine_range_mg": {
+          "type": "array",
+          "items": { "type": "number", "minimum": 0 },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "[low, high] when the page gives a range"
+        },
+        "image_url": { "type": "string", "format": "uri" },
+        "page_url": { "type": "string", "format": "uri" },
+        "available_in": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
