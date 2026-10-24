@@ -1,9 +1,15 @@
 import pytest
 
 from capsule_caffeine.http import PageError, extract_embedded_json
-from capsule_caffeine.scrape import DOMAIN, parse_caffeine, scrape_line, tidy_name
+from capsule_caffeine.scrape import (
+    DOMAIN,
+    parse_caffeine,
+    range_categories,
+    scrape_line,
+    tidy_name,
+)
 
-from .conftest import component_page
+from .conftest import category, component_page
 
 
 def test_extract_embedded_json_reads_the_script_after_the_div():
@@ -59,3 +65,9 @@ def test_scrape_line(original_tw):
         f"{DOMAIN}/p/ristretto",
         f"{DOMAIN}/tw/en/order/capsules/original",
     ]
+
+
+def test_range_categories_skip_unnamed_badges():
+    espresso = category("sg", "capsule-range-espresso", "Espresso")
+    badge = category("sg", "capsule-range-label-limited-edition", None)
+    assert range_categories([espresso, badge]) == [espresso]

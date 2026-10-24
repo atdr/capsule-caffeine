@@ -66,11 +66,15 @@ def tidy_name(name: str) -> str:
 
 
 def range_categories(categories: list[dict]) -> list[dict]:
-    """Categories that are capsule ranges (children of `.../cat/capsule-range`)."""
+    """Named categories that are capsule ranges (children of `.../cat/capsule-range`).
+
+    Unnamed ones, such as sg's limited edition label, are badges rather than ranges.
+    """
     return [
         c
         for c in categories
-        if any(s.endswith("/cat/capsule-range") for s in c.get("superCategories") or [])
+        if c.get("name")
+        and any(s.endswith("/cat/capsule-range") for s in c.get("superCategories") or [])
     ]
 
 
