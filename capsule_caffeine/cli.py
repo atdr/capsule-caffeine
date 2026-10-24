@@ -60,18 +60,27 @@ def builds(root: Path) -> dict[str, Path]:
     """{name: capsules.json path} for a single file or a directory of builds."""
     if root.is_dir():
         return {p.parent.name: p for p in sorted(root.glob(f"*/{FILENAME}"))}
-    return {root.name: root}
+    # One key for any single file, so `diff old.json new.json` compares the two.
+    return {FILENAME: root} if root.exists() else {}
 
 
 def diff(args: argparse.Namespace) -> int:
-    """Print release notes; exit 1 when anything changed, like diff(1)."""
+    """Print release notes; exit 1 when anything changed and 2 on trouble, like diff(1)."""
+    if not args.new.exists():
+        log.error("%s does not exist", args.new)
+        return 2
     old, new = builds(args.old), builds(args.new)
     changes = {}
-    for name in sorted(old.keys() | new.keys()):
-        old_doc = read_json(old[name]) if name in old else None
-        # A market missing from the new build counts as all its pods removed.
-        new_doc = read_json(new[name]) if name in new else {"lines": {}}
-        changes[name] = compare(old_doc, new_doc)
+    try:
+        for name in sorted(old.keys() | new.keys()):
+            old_doc = read_json(old[name]) if name in old else None
+            # A market missing from the new build counts as all its pods removed.
+            new_doc = read_json(new[name]) if name in new else {"lines": {}}
+            changes[name] = compare(old_doc, new_doc)
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
+        # Status 1 must mean "changed", so a broken file can't pass for an update.
+        log.error("cannot compare %s: %r", name, error)
+        return 2
     sys.stdout.write(summary(changes) + "\n")
     return 1 if any(changes.values()) else 0
 

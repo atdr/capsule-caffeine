@@ -61,3 +61,23 @@ def test_diff_command_over_build_directories(tmp_path, capsys):
 
     assert main(["diff", str(tmp_path / "old"), str(tmp_path / "old")]) == 0
     assert capsys.readouterr().out == "No changes.\n"
+
+
+def test_range_change_with_the_same_midpoint_is_a_caffeine_change():
+    newer = json.loads(json.dumps(OLD))
+    newer["lines"]["Original"]["Espresso"]["Roma"]["caffeine_range_mg"] = [40, 100]
+    assert compare(OLD, newer).caffeine == ["Original / Roma: 70 mg → 70 mg (40 to 100)"]
+
+
+def test_diff_command_over_single_files(tmp_path, capsys):
+    (tmp_path / "old.json").write_text(json.dumps(OLD))
+    (tmp_path / "new.json").write_text(json.dumps(OLD))
+    assert main(["diff", str(tmp_path / "old.json"), str(tmp_path / "new.json")]) == 0
+    assert capsys.readouterr().out == "No changes.\n"
+
+
+def test_diff_command_reports_trouble_as_2(tmp_path):
+    (tmp_path / "old.json").write_text("<html>Service Unavailable</html>")
+    (tmp_path / "new.json").write_text(json.dumps(OLD))
+    assert main(["diff", str(tmp_path / "old.json"), str(tmp_path / "new.json")]) == 2
+    assert main(["diff", str(tmp_path / "old.json"), str(tmp_path / "missing")]) == 2

@@ -17,13 +17,22 @@ class Changes:
         return bool(self.added or self.removed or self.caffeine or self.moved or self.other)
 
 
-def _pods(document: dict) -> dict[tuple[str, str], tuple[set[str], int | None]]:
-    """{(line, pod name): (ranges, caffeine_mg)}"""
-    pods: dict[tuple[str, str], tuple[set[str], int | None]] = {}
+# (caffeine_mg, caffeine_range_mg), so a range change with the same midpoint still shows.
+Caffeine = tuple[int | None, tuple[float, ...] | None]
+
+
+def _caffeine(pod: dict) -> Caffeine:
+    low_high = pod.get("caffeine_range_mg")
+    return pod["caffeine_mg"], tuple(low_high) if low_high else None
+
+
+def _pods(document: dict) -> dict[tuple[str, str], tuple[set[str], Caffeine]]:
+    """{(line, pod name): (ranges, caffeine)}"""
+    pods: dict[tuple[str, str], tuple[set[str], Caffeine]] = {}
     for line, ranges in document["lines"].items():
         for range_name, range_pods in ranges.items():
             for name, pod in range_pods.items():
-                pods.setdefault((line, name), (set(), pod["caffeine_mg"]))[0].add(range_name)
+                pods.setdefault((line, name), (set(), _caffeine(pod)))[0].add(range_name)
     return pods
 
 
@@ -57,12 +66,17 @@ def compare(old: dict | None, new: dict) -> Changes:
     return changes
 
 
-def _mg(value: int | None) -> str:
-    return "no value" if value is None else f"{value} mg"
+def _mg(caffeine: Caffeine) -> str:
+    value, low_high = caffeine
+    if value is None:
+        return "no value"
+    if low_high:
+        return f"{value} mg ({' to '.join(f'{v:g}' for v in low_high)})"
+    return f"{value} mg"
 
 
-def _label(key: tuple[str, str], caffeine_mg: int | None) -> str:
-    return f"{key[0]} / {key[1]} ({_mg(caffeine_mg)})"
+def _label(key: tuple[str, str], caffeine: Caffeine) -> str:
+    return f"{key[0]} / {key[1]} ({_mg(caffeine)})"
 
 
 def summary(changes_by_name: dict[str, Changes]) -> str:
