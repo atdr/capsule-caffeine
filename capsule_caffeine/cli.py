@@ -1,4 +1,4 @@
-"""Command line entry point: `capsule-caffeine scrape` and `capsule-caffeine diff`."""
+"""Command line entry point: `capsule-caffeine scrape`, `diff` and `site`."""
 
 import argparse
 import json
@@ -12,6 +12,7 @@ from .document import market_document
 from .http import make_session
 from .merge import merge_markets
 from .scrape import LINES, LOCALES, scrape_market
+from .site import build_site
 from .validate import problems
 
 FILENAME = "capsules.json"
@@ -85,6 +86,16 @@ def diff(args: argparse.Namespace) -> int:
     return 1 if any(changes.values()) else 0
 
 
+def site(args: argparse.Namespace) -> int:
+    """Build the static site for GitHub Pages from a build."""
+    found = builds(args.build)
+    if not found:
+        log.error("no %s found in %s", FILENAME, args.build)
+        return 1
+    build_site(found, args.out)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="capsule-caffeine")
     parser.add_argument("-v", "--verbose", action="store_true", help="log progress")
@@ -114,6 +125,19 @@ def main(argv: list[str] | None = None) -> int:
     diff_cmd.add_argument("old", type=Path)
     diff_cmd.add_argument("new", type=Path)
     diff_cmd.set_defaults(run=diff)
+
+    site_cmd = commands.add_parser("site", help="build the static site from a build")
+    site_cmd.add_argument(
+        "build",
+        type=Path,
+        help="a build directory (default: dist)",
+        nargs="?",
+        default=Path("dist"),
+    )
+    site_cmd.add_argument(
+        "-o", "--out", type=Path, default=Path("site"), help="output directory (default: site)"
+    )
+    site_cmd.set_defaults(run=site)
 
     args = parser.parse_args(argv)
     logging.basicConfig(
