@@ -101,3 +101,17 @@ site/
 
 # Built Shortcuts
 *.shortcut
+
+# Secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Coverage (`pytest --cov` writes the data file and coverage.xml)
+.coverage
+coverage.xml
+htmlcov/
+
+# Claude Code
+.claude/settings.local.json
