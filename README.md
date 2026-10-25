@@ -1,4 +1,4 @@
-![capsule-caffeine: caffeine in every Nespresso pod, logged to Apple Health](https://raw.githubusercontent.com/atdr/capsule-caffeine/master/docs/images/banner.png)
+![capsule-caffeine: caffeine in every Nespresso pod, logged to Apple Health](docs/images/banner.png)
 
 # capsule-caffeine
 

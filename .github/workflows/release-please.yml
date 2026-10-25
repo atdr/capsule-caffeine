@@ -2,7 +2,8 @@ name: release-please
 
 on:
   push:
-    branches: [master]
+    # Both while the default branch is renamed from master to main.
+    branches: [master, main]
 
 permissions:
   contents: write
