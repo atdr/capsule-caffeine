@@ -8,6 +8,13 @@ Python web scraper to gather data on the caffeine content of Nespresso pod coffe
 
 Pods that Nespresso publishes no caffeine figure for are not logged. If the data ever moves to a new format, the Shortcut asks you to update it rather than logging wrong numbers.
 
+The Shortcut is generated from [`shortcut.py`](capsule_caffeine/shortcut.py), and each release attaches an unsigned build. Shortcuts only imports signed files, and signing needs a Mac logged into iCloud, so to build your own:
+
+```sh
+uv run capsule-caffeine shortcut -o unsigned.shortcut
+shortcuts sign --mode anyone --input unsigned.shortcut --output "Nespresso Log.shortcut"
+```
+
 The original Shortcuts ([single pod](https://www.icloud.com/shortcuts/4f33796a6ad24dd3aa20773b33eba3a2), [multiple pods](https://www.icloud.com/shortcuts/dd5f8b82081341c0bc7250667eca1da0)) read data pinned to the `v1.1` and `v1.0` tags. They keep working, but their data is no longer updated.
 
 ## Running the scraper
