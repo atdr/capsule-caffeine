@@ -22,7 +22,17 @@
       "WFAskActionPrompt",
       "WFInputType",
       "urlAnswer"
-    ]
+    ],
+    "choices": {
+      "WFInputType": [
+        "Date",
+        "Date and Time",
+        "Number",
+        "Text",
+        "Time",
+        "URL"
+      ]
+    }
   },
   "choosefromlist": {
     "keys": [

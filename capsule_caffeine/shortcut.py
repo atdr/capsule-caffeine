@@ -279,7 +279,7 @@ def build() -> dict:
         "WFQuickActionSurfaces": [],
         "WFWorkflowMinimumClientVersion": 900,
         "WFWorkflowMinimumClientVersionString": "900",
-        "WFWorkflowTypes": ["Watch"],
+        "WFWorkflowTypes": ["WatchKit"],
     }
 
 
@@ -301,7 +301,7 @@ def problems(shortcut: dict) -> list[str]:
     steps = shortcut["WFWorkflowActions"]
     outputs: set[str] = set()
     variables: set[str] = set()
-    open_groups: list[str] = []
+    open_blocks: list[dict] = []  # innermost last: {"group": id, "otherwise": seen yet}
 
     def references(value):
         if isinstance(value, dict):
@@ -325,25 +325,31 @@ def problems(shortcut: dict) -> list[str]:
         if step["WFWorkflowActionIdentifier"].endswith("conditional"):
             group, mode = params["GroupingIdentifier"], params["WFControlFlowMode"]
             if mode == 0:
-                open_groups.append(group)
-            elif not open_groups or open_groups[-1] != group:
+                open_blocks.append({"group": group, "otherwise": False})
+            elif not open_blocks or open_blocks[-1]["group"] != group:
                 found.append(f"action {index}: Otherwise or End If without its If")
-            elif mode == 2:
-                open_groups.pop()
+            elif mode == 1 and open_blocks[-1]["otherwise"]:
+                found.append(f"action {index}: a second Otherwise in one If")
+            elif mode == 1:
+                open_blocks[-1]["otherwise"] = True
+            else:
+                open_blocks.pop()
         if "UUID" in params:
             outputs.add(params["UUID"])
         if "WFVariableName" in params:
             variables.add(params["WFVariableName"])
-    if open_groups:
-        found.append(f"{len(open_groups)} If without End If")
+    if open_blocks:
+        found.append(f"{len(open_blocks)} If without End If")
 
-    # An id names one thing: one action's output, or one If block (shared by its parts).
+    # An id names one thing: one action's output, or one If block. A block's id is
+    # claimed by its If; its Otherwise and End If share it.
     owners: dict[str, str] = {}
     for index, step in enumerate(steps):
         params = step["WFWorkflowActionParameters"]
-        claims = [(params.get("UUID"), f"action {index}"), (params.get("GroupingIdentifier"), "")]
+        claims = [(params.get("UUID"), f"action {index}")]
+        if params.get("WFControlFlowMode") == 0:
+            claims.append((params.get("GroupingIdentifier"), f"the If at action {index}"))
         for id_, owner in claims:
-            owner = owner or f"If block {id_}"
             if id_ and owners.setdefault(id_, owner) != owner:
                 found.append(f"id {id_} is used by {owners[id_]} and {owner}")
 

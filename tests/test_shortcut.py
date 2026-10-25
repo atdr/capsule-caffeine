@@ -67,3 +67,41 @@ def test_problems_catch_misspelt_keys_and_bad_choices():
     found = shortcut.problems(built)
     assert any("alert has no parameter WFAlertActionShowCancelButton" in p for p in found)
     assert any("WFMathOperation '*' is not one of" in p for p in found)
+
+
+def conditionals(steps):
+    return [a for a in steps if a["WFWorkflowActionIdentifier"].endswith("conditional")]
+
+
+def test_problems_catch_a_second_otherwise():
+    built = shortcut.build()
+    steps = built["WFWorkflowActions"]
+    otherwise = next(
+        i
+        for i, a in enumerate(steps)
+        if a["WFWorkflowActionParameters"].get("WFControlFlowMode") == 1
+    )
+    steps.insert(otherwise, steps[otherwise])
+
+    assert any("a second Otherwise in one If" in p for p in shortcut.problems(built))
+
+
+def test_problems_catch_two_if_blocks_sharing_an_id():
+    built = shortcut.build()
+    blocks = conditionals(built["WFWorkflowActions"])
+    first = blocks[0]["WFWorkflowActionParameters"]["GroupingIdentifier"]
+    # Give the next complete If block (the schema check) the first block's id.
+    for block in blocks[3:5]:
+        block["WFWorkflowActionParameters"]["GroupingIdentifier"] = first
+
+    assert any("is used by the If at action" in p for p in shortcut.problems(built))
+
+
+def test_problems_catch_a_bad_input_type():
+    built = shortcut.build()
+    ask = next(
+        a for a in built["WFWorkflowActions"] if a["WFWorkflowActionIdentifier"].endswith("ask")
+    )
+    ask["WFWorkflowActionParameters"]["WFInputType"] = "Nubmer"
+
+    assert any("WFInputType 'Nubmer' is not one of" in p for p in shortcut.problems(built))
