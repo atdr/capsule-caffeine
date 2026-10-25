@@ -12,6 +12,10 @@ on:
         type: boolean
         default: false
 
+# Scoped per job: building reads, deploying needs Pages and OIDC, and only the
+# snapshot writes releases.
+permissions: {}
+
 concurrency:
   group: data
   cancel-in-progress: false
@@ -21,6 +25,9 @@ env:
 
 jobs:
   build:
+    name: scrape and build the site
+    # A scrape of every market, against a site that can be slow to answer.
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -87,7 +94,9 @@ jobs:
             notes.md
 
   deploy:
+    name: deploy to Pages
     needs: build
+    timeout-minutes: 10
     if: needs.build.outputs.publish == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -101,7 +110,9 @@ jobs:
         uses: actions/deploy-pages@v4
 
   snapshot:
+    name: publish the dated data release
     needs: [build, deploy]
+    timeout-minutes: 10
     if: needs.build.outputs.changed == 'true'
     runs-on: ubuntu-latest
     permissions:
