@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/atdr/capsule-caffeine/compare/v2.0.1...v2.1.0) (2026-10-25)
+
+
+### Features
+
+* **shortcut:** generate the Nespresso Log Shortcut from code ([#16](https://github.com/atdr/capsule-caffeine/issues/16)) ([b54183f](https://github.com/atdr/capsule-caffeine/commit/b54183f2cdd821ab9a60d4fcc22193faf1e78773))
+
 ## [2.0.1](https://github.com/atdr/capsule-caffeine/compare/v2.0.0...v2.0.1) (2026-10-24)
 
 
