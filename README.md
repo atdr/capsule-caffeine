@@ -1,6 +1,15 @@
-# Capsule Caffeine
+![capsule-caffeine: caffeine in every Nespresso pod, logged to Apple Health](https://raw.githubusercontent.com/atdr/capsule-caffeine/master/docs/images/banner.png)
 
-Python web scraper to gather data on the caffeine content of Nespresso pod coffee.
+# capsule-caffeine
+
+[![CI](https://img.shields.io/github/actions/workflow/status/atdr/capsule-caffeine/ci.yml?style=flat-square&label=CI)](https://github.com/atdr/capsule-caffeine/actions/workflows/ci.yml)
+[![data build](https://img.shields.io/github/actions/workflow/status/atdr/capsule-caffeine/data.yml?style=flat-square&label=data%20build)](https://github.com/atdr/capsule-caffeine/actions/workflows/data.yml)
+[![latest data](https://img.shields.io/github/v/release/atdr/capsule-caffeine?style=flat-square&filter=data-*&label=latest%20data)](https://atdr.github.io/capsule-caffeine/)
+[![release](https://img.shields.io/github/v/release/atdr/capsule-caffeine?style=flat-square&filter=v*)](https://github.com/atdr/capsule-caffeine/releases/latest)
+[![Shortcut on iCloud](https://img.shields.io/badge/Shortcut-iCloud-a98e6c?style=flat-square&logo=apple&logoColor=white)](https://www.icloud.com/shortcuts/18faaf7919cf40d6bf259d3824d66790)
+[![Shortcut on RoutineHub](https://img.shields.io/badge/Shortcut-RoutineHub-a98e6c?style=flat-square&logo=apple&logoColor=white)](https://routinehub.co/shortcut/8103/)
+
+The caffeine content of Nespresso pods, scraped weekly from nespresso.com and [published as JSON](#data), with an Apple Shortcut that logs it to Health.
 
 ## Shortcut
 
