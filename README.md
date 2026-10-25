@@ -1,4 +1,6 @@
-<p align="center"><img src="docs/images/banner.png" alt="capsule-caffeine: caffeine in every Nespresso pod, logged to Apple Health" width="100%"></p>
+![capsule-caffeine: caffeine in every Nespresso pod, logged to Apple Health](https://raw.githubusercontent.com/atdr/capsule-caffeine/master/docs/images/banner.png)
+
+# capsule-caffeine
 
 The caffeine content of Nespresso pods, scraped weekly from nespresso.com and [published as JSON](#data), with an Apple Shortcut that logs it to Health.
 
