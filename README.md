@@ -1,6 +1,6 @@
-# Capsule Caffeine
+![capsule-caffeine: caffeine in every Nespresso pod, logged to Apple Health](docs/images/readme-hero.png)
 
-Python web scraper to gather data on the caffeine content of Nespresso pod coffee.
+The caffeine content of Nespresso pods, scraped weekly from nespresso.com and [published as JSON](#data), with an Apple Shortcut that logs it to Health.
 
 ## Shortcut
 
