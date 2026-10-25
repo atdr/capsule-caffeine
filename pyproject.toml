@@ -18,6 +18,7 @@ capsule-caffeine = "capsule_caffeine.cli:main"
 [dependency-groups]
 dev = [
     "pytest>=8",
+    "pytest-cov>=6",
     "ruff>=0.6",
 ]
 
@@ -33,3 +34,8 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+# What `pytest --cov` measures, here rather than on CI's command line, so a
+# local run measures what CI measures.
+[tool.coverage.run]
+source = ["capsule_caffeine"]

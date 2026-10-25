@@ -1,0 +1,44 @@
+name: pull-request
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+# A PR-only workflow, so cancelling a superseded run never loses a result on
+# main.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  conventional:
+    # `edited` also fires for closed and merged PRs, where the commit range no
+    # longer resolves after a squash merge.
+    if: github.event.pull_request.state == 'open'
+    uses: atdr/github-boilerplate/.github/workflows/conventional.yml@v0.2.0
+
+  # The one check branch protection requires from this workflow. Requiring the
+  # jobs above by name would tie the ruleset to job names inside another
+  # repository's workflow.
+  gate:
+    name: pull-request gate
+    # Not always(): a run superseded by a newer one is cancelled, and its gate
+    # would report a failure on the same commit the newer run is checking.
+    if: ${{ !cancelled() }}
+    needs: [conventional]
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every job to have passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          for result in $RESULTS; do
+            case "$result" in
+              failure|cancelled) echo "::error::a required job finished as $result"; exit 1 ;;
+            esac
+          done
