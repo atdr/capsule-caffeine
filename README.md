@@ -4,9 +4,17 @@ Python web scraper to gather data on the caffeine content of Nespresso pod coffe
 
 ## Shortcut
 
-[Nespresso Log](https://www.icloud.com/shortcuts/4d98f10396bc459382d860e7677df1ce) (also on [RoutineHub](https://routinehub.co/shortcut/8103/)) logs a pod's caffeine to the Health app. Pick the machine, range and pod, say how many pods, and it logs the total with a notification showing the pod. When you add it, it asks for a market: `tw` (Taiwan), `sg` (Singapore) or `merged` (both, experimental). It reads the [published data](#data), so it picks up new pods without updating. Run it with a date as input to log a pod after the fact.
+[Nespresso Log](https://www.icloud.com/shortcuts/18faaf7919cf40d6bf259d3824d66790) (also on [RoutineHub](https://routinehub.co/shortcut/8103/)) logs a pod's caffeine to the Health app. Pick the machine, range and pod, say how many pods, and it logs the total with a notification showing the pod. When you add it, it asks for a market: `tw` (Taiwan), `sg` (Singapore) or `merged` (both, experimental). It reads the [published data](#data), so it picks up new pods without updating. Run it with a date as input to log a pod after the fact.
 
 Pods that Nespresso publishes no caffeine figure for are not logged. If the data ever moves to a new format, the Shortcut asks you to update it rather than logging wrong numbers.
+
+The Shortcut is generated from [`shortcut.py`](capsule_caffeine/shortcut.py), and each release attaches an unsigned build. Shortcuts only imports signed files, and signing needs a Mac logged into iCloud, so to build your own:
+
+```sh
+scripts/sign-shortcut.sh            # the latest release's build, signed as "Nespresso Log.shortcut"
+scripts/sign-shortcut.sh --local    # or build from this checkout
+scripts/sign-shortcut.sh --upload   # also attach the signed file to the release
+```
 
 The original Shortcuts ([single pod](https://www.icloud.com/shortcuts/4f33796a6ad24dd3aa20773b33eba3a2), [multiple pods](https://www.icloud.com/shortcuts/dd5f8b82081341c0bc7250667eca1da0)) read data pinned to the `v1.1` and `v1.0` tags. They keep working, but their data is no longer updated.
 
@@ -69,7 +77,7 @@ The scraper is versioned by [release-please](https://github.com/googleapis/relea
 
 ## Thanks
 
-To everyone who kept this going in their forks: [DEEJCUK](https://github.com/DEEJCUK/capsule-caffeine) for Vertuo support and a sturdier standalone scraper, which inspired this one; [edspc](https://github.com/edspc/capsule-caffeine) and [yuejunfeng0909](https://github.com/yuejunfeng0909/capsule-caffeine) for data refreshes and Singapore support; and [wiebecommajonas](https://github.com/wiebecommajonas) and [indiamai](https://github.com/indiamai) for their contributions here.
+To everyone who kept this going in their forks: [DEEJCUK](https://github.com/DEEJCUK/capsule-caffeine) for Vertuo support and a sturdier standalone scraper, which inspired this one; [edspc](https://github.com/edspc/capsule-caffeine) and [yuejunfeng0909](https://github.com/yuejunfeng0909/capsule-caffeine) for data refreshes and Singapore support; and [wiebecommajonas](https://github.com/wiebecommajonas) and [indiamai](https://github.com/indiamai) for their contributions here. The Shortcut's parameter check uses action definitions extracted by [shortcutkit](https://github.com/frontboat/shortcutkit) (MIT).
 
 ## License
 

@@ -1,4 +1,4 @@
-"""Command line entry point: `capsule-caffeine scrape`, `diff` and `site`."""
+"""Command line entry point: `capsule-caffeine scrape`, `diff`, `site` and `shortcut`."""
 
 import argparse
 import json
@@ -7,6 +7,7 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
+from . import shortcut as nespresso_log
 from .diff import compare, summary
 from .document import market_document
 from .http import make_session
@@ -96,6 +97,17 @@ def site(args: argparse.Namespace) -> int:
     return 0
 
 
+def shortcut(args: argparse.Namespace) -> int:
+    """Build the unsigned Nespresso Log Shortcut; exit 1 if its structure is broken."""
+    built = nespresso_log.build()
+    for problem in nespresso_log.problems(built):
+        log.error("%s", problem)
+    if nespresso_log.problems(built):
+        return 1
+    args.out.write_bytes(nespresso_log.to_bytes(built))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="capsule-caffeine")
     parser.add_argument("-v", "--verbose", action="store_true", help="log progress")
@@ -138,6 +150,16 @@ def main(argv: list[str] | None = None) -> int:
         "-o", "--out", type=Path, default=Path("site"), help="output directory (default: site)"
     )
     site_cmd.set_defaults(run=site)
+
+    shortcut_cmd = commands.add_parser("shortcut", help="build the unsigned Nespresso Log Shortcut")
+    shortcut_cmd.add_argument(
+        "-o",
+        "--out",
+        type=Path,
+        default=Path("Nespresso Log (unsigned).shortcut"),
+        help="output file (default: Nespresso Log (unsigned).shortcut)",
+    )
+    shortcut_cmd.set_defaults(run=shortcut)
 
     args = parser.parse_args(argv)
     logging.basicConfig(

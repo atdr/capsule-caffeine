@@ -98,3 +98,6 @@ __pycache__/
 # Build output (scraped data is never committed)
 dist/
 site/
+
+# Built Shortcuts
+*.shortcut
