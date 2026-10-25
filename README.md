@@ -11,8 +11,9 @@ Pods that Nespresso publishes no caffeine figure for are not logged. If the data
 The Shortcut is generated from [`shortcut.py`](capsule_caffeine/shortcut.py), and each release attaches an unsigned build. Shortcuts only imports signed files, and signing needs a Mac logged into iCloud, so to build your own:
 
 ```sh
-uv run capsule-caffeine shortcut -o unsigned.shortcut
-shortcuts sign --mode anyone --input unsigned.shortcut --output "Nespresso Log.shortcut"
+scripts/sign-shortcut.sh            # the latest release's build, signed as "Nespresso Log.shortcut"
+scripts/sign-shortcut.sh --local    # or build from this checkout
+scripts/sign-shortcut.sh --upload   # also attach the signed file to the release
 ```
 
 The original Shortcuts ([single pod](https://www.icloud.com/shortcuts/4f33796a6ad24dd3aa20773b33eba3a2), [multiple pods](https://www.icloud.com/shortcuts/dd5f8b82081341c0bc7250667eca1da0)) read data pinned to the `v1.1` and `v1.0` tags. They keep working, but their data is no longer updated.
