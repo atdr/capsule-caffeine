@@ -1,17 +1,16 @@
-<!doctype html><html><head><meta charset="utf-8"><title>capsule-caffeine README hero</title><link rel="stylesheet" href="card-base.css"><style>
-html, body { height: 440px; }
+<!doctype html><html><head><meta charset="utf-8"><title>capsule-caffeine banner</title><link rel="stylesheet" href="card-base.css"><style>
 :root { --bg: #160e09; --ink: #ecc894; --ink-soft: #c9b39b; --accent: #5fd3c6; }
 body { background:
   radial-gradient(560px 480px at 80% 46%, rgba(214,150,84,.30) 0%, transparent 70%),
   radial-gradient(420px 360px at 8% 92%, rgba(150,86,44,.22) 0%, transparent 70%),
   linear-gradient(160deg, #24170f 0%, #120b07 100%); }
 #beans { position: absolute; inset: 0; z-index: 0; }
-.copy { top: -6px; width: 560px; }
-.name { font-size: 92px; padding-bottom: 6px;
+.copy { top: -30px; width: 560px; }
+.name { font-size: 100px; padding-bottom: 6px;
   background: linear-gradient(180deg, #f3d6a8 0%, #dcae72 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .tagline { color: #dcc8b2; }
 .cmd { color: #b59d86; }
-.note { position: absolute; left: 618px; top: 134px; width: 636px; border-radius: 40px; z-index: 2;
+.note { position: absolute; left: 618px; top: 236px; width: 636px; border-radius: 40px; z-index: 2;
   display: flex; align-items: center; gap: 22px; padding: 26px 28px 26px 26px;
   background: rgba(40,35,32,.96); box-shadow: 0 0 0 2px rgba(236,200,148,.22), 0 40px 90px rgba(0,0,0,.6);
   font-family: -apple-system, 'SF Pro Text', 'Schibsted Grotesk', sans-serif; color: #f4f1ee; }
@@ -22,9 +21,21 @@ body { background:
 .b .mg { color: var(--accent); font-weight: 600; }
 .side { align-self: stretch; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; }
 .when { font-size: 22px; color: #a49c96; }
+/* README banner: 1280x320, derived from the social preview card. */
+html, body { height: 320px; }
+body { background:
+  radial-gradient(420px 300px at 86% 50%, rgba(214,150,84,.30) 0%, transparent 70%),
+  radial-gradient(320px 240px at 6% 100%, rgba(150,86,44,.22) 0%, transparent 70%),
+  linear-gradient(160deg, #24170f 0%, #120b07 100%); }
+.copy { left: 72px; top: -36px; width: 720px; }
+.name { font-size: 88px; white-space: nowrap; }
+.tagline { margin-top: 16px; font-size: 25px; max-width: none; white-space: nowrap; }
+.cmd { left: 72px; bottom: auto; top: 238px; font-size: 20px; }
+.note { left: 846px; top: 84px; }
 </style></head><body>
-<svg id="beans" width="1280" height="440"></svg>
-<div class="copy"><div class="name">capsule-<br>caffeine</div><div class="tagline">Caffeine in every Nespresso pod, logged to Apple Health.</div></div>
+<svg id="beans" width="1280" height="320"></svg>
+<div class="copy"><div class="name">capsule-caffeine</div><div class="tagline">Caffeine in every Nespresso pod, logged to Apple Health.</div></div>
+<div class="cmd">atdr.github.io/capsule-caffeine</div>
 <div class="note">
   <div class="icon"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12v4a6 6 0 0 1-6 6h0a6 6 0 0 1-6-6z" fill="#fff"/><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H15.5"/><path d="M3 21h14"/></svg></div>
   <div class="text"><div class="t">Nespresso Log</div><div class="t">Colombia</div><div class="b"><span class="mg">64 mg</span> caffeine ☕️ (1 × 64 mg)</div></div>
@@ -55,13 +66,14 @@ const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 const svg = document.getElementById('beans');
 const ns = 'http://www.w3.org/2000/svg';
 const placed = [];
-for (let tries = 0; placed.length < 16 && tries < 4000; tries++) {
-  const x = rand() * 1320 - 20, y = rand() * 480 - 20, s = 20 + rand() * 18;
+for (let tries = 0; placed.length < 12 && tries < 4000; tries++) {
+  const x = rand() * 1320 - 20, y = rand() * 360 - 20, s = 20 + rand() * 18;
   if (placed.some(p => Math.hypot(p.x - x, p.y - y) < (p.s + s) * 1.5)) continue;
   // Few beans behind the name and tagline, none under the notification.
-  if (x > 590 && x < 1280 && y > 100 && y < 330) continue;
+  if (x > 800 && y > 50 && y < 270) continue;
   // None behind the name, tagline or URL.
-  if (x > 50 && x < 660 && y > 60 && y < 390) continue;
+  if (x > 40 && x < 820 && y > 30 && y < 290) continue;
+  if (x > 50 && x < 520 && y > 560 && y < 610) continue;
   placed.push({ x, y, s });
   const g = document.createElementNS(ns, 'g');
   g.setAttribute('transform', `translate(${x} ${y}) rotate(${rand() * 360}) scale(${s / 20})`);
