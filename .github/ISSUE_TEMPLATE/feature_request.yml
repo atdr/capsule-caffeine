@@ -1,0 +1,31 @@
+name: Feature request
+description: Suggest a capability or an improvement
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please write in plain English: short sentences, everyday words, and what you are trying to do. There is no need to write it up formally.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do that is hard or impossible today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: What you would like to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you have considered
+      description: Other tools, scripts, or workarounds, and why they fall short.
+    validations:
+      required: false
