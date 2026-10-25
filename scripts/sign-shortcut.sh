@@ -48,11 +48,18 @@ else
   fi
 fi
 
-# Signing goes through Apple's servers, which sometimes answer with an error.
-if ! shortcuts sign --mode anyone --input "$work/$unsigned_name" --output "$signed"; then
-  echo "Signing failed; it needs iCloud and Apple's servers, so try again shortly" >&2
-  exit 1
-fi
+# Signing goes through Apple's servers, which sometimes answer with an error 500 for the
+# same file that signs a minute later, so retry before giving up.
+attempt=1
+until shortcuts sign --mode anyone --input "$work/$unsigned_name" --output "$signed"; do
+  if [ "$attempt" -ge 3 ]; then
+    echo "Signing failed $attempt times; it needs iCloud and Apple's servers, so try later" >&2
+    exit 1
+  fi
+  echo "Signing failed; retrying in $((attempt * 20)) seconds" >&2
+  sleep $((attempt * 20))
+  attempt=$((attempt + 1))
+done
 echo "Signed: $signed (open it to import)"
 
 if [ -n "$upload" ]; then
