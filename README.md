@@ -4,7 +4,7 @@ Python web scraper to gather data on the caffeine content of Nespresso pod coffe
 
 ## Shortcut
 
-[Nespresso Log](https://www.icloud.com/shortcuts/4d98f10396bc459382d860e7677df1ce) (also on [RoutineHub](https://routinehub.co/shortcut/8103/)) logs a pod's caffeine to the Health app. Pick the machine, range and pod, say how many pods, and it logs the total with a notification showing the pod. When you add it, it asks for a market: `tw` (Taiwan), `sg` (Singapore) or `merged` (both, experimental). It reads the [published data](#data), so it picks up new pods without updating. Run it with a date as input to log a pod after the fact.
+[Nespresso Log](https://www.icloud.com/shortcuts/18faaf7919cf40d6bf259d3824d66790) (also on [RoutineHub](https://routinehub.co/shortcut/8103/)) logs a pod's caffeine to the Health app. Pick the machine, range and pod, say how many pods, and it logs the total with a notification showing the pod. When you add it, it asks for a market: `tw` (Taiwan), `sg` (Singapore) or `merged` (both, experimental). It reads the [published data](#data), so it picks up new pods without updating. Run it with a date as input to log a pod after the fact.
 
 Pods that Nespresso publishes no caffeine figure for are not logged. If the data ever moves to a new format, the Shortcut asks you to update it rather than logging wrong numbers.
 
