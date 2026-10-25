@@ -54,3 +54,16 @@ def test_problems_catch_an_id_used_twice():
     ]["UUID"]
 
     assert any("is used by" in p for p in shortcut.problems(built))
+
+
+def test_problems_catch_misspelt_keys_and_bad_choices():
+    built = shortcut.build()
+    steps = built["WFWorkflowActions"]
+    alert = next(a for a in steps if a["WFWorkflowActionIdentifier"].endswith("alert"))
+    alert["WFWorkflowActionParameters"]["WFAlertActionShowCancelButton"] = False
+    math = next(a for a in steps if a["WFWorkflowActionIdentifier"].endswith("math"))
+    math["WFWorkflowActionParameters"]["WFMathOperation"] = "*"
+
+    found = shortcut.problems(built)
+    assert any("alert has no parameter WFAlertActionShowCancelButton" in p for p in found)
+    assert any("WFMathOperation '*' is not one of" in p for p in found)

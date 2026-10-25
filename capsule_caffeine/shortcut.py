@@ -7,8 +7,10 @@ The format is undocumented; this follows the files the Shortcuts app itself expo
 UUIDs are derived from names, so an unchanged Shortcut builds to identical bytes.
 """
 
+import json
 import plistlib
 import uuid
+from importlib import resources
 
 DATA_URL = "https://atdr.github.io/capsule-caffeine/{}/capsules.json"
 REPO_URL = "https://github.com/atdr/capsule-caffeine"
@@ -188,7 +190,7 @@ def actions() -> list[dict]:
             "alert",
             WFAlertActionTitle="Please update this Shortcut",
             WFAlertActionMessage="The capsule data has moved to a newer format.",
-            WFAlertActionShowCancelButton=False,
+            WFAlertActionCancelButtonShown=False,
         ),
         action("openurl", WFInput=text(REPO_URL)),
         action("exit"),
@@ -281,6 +283,18 @@ def build() -> dict:
     }
 
 
+# Keys every action may carry, and the legacy single-condition If keys, which Shortcuts
+# still reads and migrates to its newer WFConditions form.
+COMMON_KEYS = {"UUID", "GroupingIdentifier", "WFControlFlowMode", "CustomOutputName"}
+LEGACY_IF_KEYS = {"WFInput", "WFCondition", "WFConditionalActionString", "WFNumberValue"}
+
+
+def known_actions() -> dict:
+    """Parameter keys and choices for the actions used here, from Apple's own definitions."""
+    data = resources.files(__package__).joinpath("shortcut_actions.json").read_text("utf-8")
+    return {k: v for k, v in json.loads(data).items() if not k.startswith("_")}
+
+
 def problems(shortcut: dict) -> list[str]:
     """Structural mistakes the Shortcuts editor would only show on a device."""
     found = []
@@ -332,6 +346,25 @@ def problems(shortcut: dict) -> list[str]:
             owner = owner or f"If block {id_}"
             if id_ and owners.setdefault(id_, owner) != owner:
                 found.append(f"id {id_} is used by {owners[id_]} and {owner}")
+
+    # Shortcuts silently ignores a misspelt key, so check them against the definitions.
+    catalog = known_actions()
+    for index, step in enumerate(steps):
+        name = step["WFWorkflowActionIdentifier"].removeprefix("is.workflow.actions.")
+        params = step["WFWorkflowActionParameters"]
+        if name not in catalog:
+            found.append(f"action {index}: {name} is not in shortcut_actions.json")
+            continue
+        allowed = set(catalog[name]["keys"]) | COMMON_KEYS
+        if name == "conditional":
+            allowed |= LEGACY_IF_KEYS
+        for key in sorted(set(params) - allowed):
+            found.append(f"action {index}: {name} has no parameter {key}")
+        for key, choices in catalog[name].get("choices", {}).items():
+            if isinstance(params.get(key), str) and params[key] not in choices:
+                found.append(
+                    f"action {index}: {name}.{key} {params[key]!r} is not one of {choices}"
+                )
 
     for question in shortcut.get("WFWorkflowImportQuestions", []):
         target = steps[question["ActionIndex"]]["WFWorkflowActionParameters"]

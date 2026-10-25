@@ -76,7 +76,7 @@ The scraper is versioned by [release-please](https://github.com/googleapis/relea
 
 ## Thanks
 
-To everyone who kept this going in their forks: [DEEJCUK](https://github.com/DEEJCUK/capsule-caffeine) for Vertuo support and a sturdier standalone scraper, which inspired this one; [edspc](https://github.com/edspc/capsule-caffeine) and [yuejunfeng0909](https://github.com/yuejunfeng0909/capsule-caffeine) for data refreshes and Singapore support; and [wiebecommajonas](https://github.com/wiebecommajonas) and [indiamai](https://github.com/indiamai) for their contributions here.
+To everyone who kept this going in their forks: [DEEJCUK](https://github.com/DEEJCUK/capsule-caffeine) for Vertuo support and a sturdier standalone scraper, which inspired this one; [edspc](https://github.com/edspc/capsule-caffeine) and [yuejunfeng0909](https://github.com/yuejunfeng0909/capsule-caffeine) for data refreshes and Singapore support; and [wiebecommajonas](https://github.com/wiebecommajonas) and [indiamai](https://github.com/indiamai) for their contributions here. The Shortcut's parameter check uses action definitions extracted by [shortcutkit](https://github.com/frontboat/shortcutkit) (MIT).
 
 ## License
 

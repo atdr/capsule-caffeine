@@ -1,0 +1,161 @@
+{
+  "_source": "Extracted from shortcutkit's data/builtin-actions.json (https://github.com/frontboat/shortcutkit/blob/cec79aaa41e35ba1b900fc3bd06bcf8778eb3d41/data/builtin-actions.json, MIT License, Copyright frontboat), itself extracted from Shortcuts 10.0 on macOS 27.2. Only the actions this Shortcut uses.",
+  "alert": {
+    "keys": [
+      "WFAlertActionCancelButtonShown",
+      "WFAlertActionMessage",
+      "WFAlertActionTitle"
+    ]
+  },
+  "ask": {
+    "keys": [
+      "ShowWhenRun",
+      "WFAllowsMultilineText",
+      "WFAskActionAllowsDecimalNumbers",
+      "WFAskActionAllowsNegativeNumbers",
+      "WFAskActionDefaultAnswer",
+      "WFAskActionDefaultAnswerDate",
+      "WFAskActionDefaultAnswerDateAndTime",
+      "WFAskActionDefaultAnswerNumber",
+      "WFAskActionDefaultAnswerTime",
+      "WFAskActionDefaultAnswerURL",
+      "WFAskActionPrompt",
+      "WFInputType",
+      "urlAnswer"
+    ]
+  },
+  "choosefromlist": {
+    "keys": [
+      "WFChooseFromListActionPrompt",
+      "WFChooseFromListActionSelectAll",
+      "WFChooseFromListActionSelectMultiple",
+      "WFInput"
+    ]
+  },
+  "comment": {
+    "keys": [
+      "WFCommentActionText"
+    ]
+  },
+  "conditional": {
+    "keys": [
+      "WFConditions"
+    ]
+  },
+  "downloadurl": {
+    "keys": [
+      "ShowHeaders",
+      "WFFormValues",
+      "WFHTTPBodyType",
+      "WFHTTPHeaders",
+      "WFHTTPMethod",
+      "WFJSONValues",
+      "WFRequestVariable",
+      "WFURL"
+    ],
+    "choices": {
+      "WFHTTPMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE"
+      ],
+      "WFHTTPBodyType": [
+        "JSON",
+        "Form",
+        "File"
+      ]
+    }
+  },
+  "exit": {
+    "keys": [
+      "WFResult"
+    ]
+  },
+  "getvalueforkey": {
+    "keys": [
+      "WFDictionaryKey",
+      "WFGetDictionaryValueType",
+      "WFInput"
+    ],
+    "choices": {
+      "WFGetDictionaryValueType": [
+        "Value",
+        "All Keys",
+        "All Values"
+      ]
+    }
+  },
+  "gettext": {
+    "keys": [
+      "WFTextActionText"
+    ]
+  },
+  "health.quantity.log": {
+    "keys": [
+      "WFCategorySampleAdditionalEnumerationKey",
+      "WFCategorySampleEnumeration",
+      "WFQuantitySampleAdditionalEnumeration",
+      "WFQuantitySampleAdditionalQuantity",
+      "WFQuantitySampleDate",
+      "WFQuantitySampleQuantity",
+      "WFQuantitySampleType",
+      "WFSampleEndDate"
+    ]
+  },
+  "math": {
+    "keys": [
+      "WFInput",
+      "WFMathOperand",
+      "WFMathOperation",
+      "WFScientificMathOperand",
+      "WFScientificMathOperation"
+    ],
+    "choices": {
+      "WFMathOperation": [
+        "+",
+        "-",
+        "×",
+        "÷",
+        "…"
+      ],
+      "WFScientificMathOperation": [
+        "Modulus",
+        "x^2",
+        "x^3",
+        "x^y",
+        "e^x",
+        "10^x",
+        "ln(x)",
+        "log(x)",
+        "√x",
+        "∛x",
+        "x!",
+        "sin(x)",
+        "cos(x)",
+        "tan(x)",
+        "abs(x)"
+      ]
+    }
+  },
+  "notification": {
+    "keys": [
+      "WFInput",
+      "WFNotificationActionBody",
+      "WFNotificationActionSound",
+      "WFNotificationActionTitle"
+    ]
+  },
+  "openurl": {
+    "keys": [
+      "WFInput"
+    ]
+  },
+  "setvariable": {
+    "keys": [
+      "WFInput",
+      "WFVariableName"
+    ]
+  }
+}
