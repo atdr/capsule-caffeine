@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/atdr/capsule-caffeine/compare/v2.1.0...v2.1.1) (2026-10-27)
+
+
+### Documentation
+
+* add a README banner and the social preview sources ([#19](https://github.com/atdr/capsule-caffeine/issues/19)) ([cabad83](https://github.com/atdr/capsule-caffeine/commit/cabad834222e384282c559eec146028154b40f49))
+
 ## [2.1.0](https://github.com/atdr/capsule-caffeine/compare/v2.0.1...v2.1.0) (2026-10-25)
 
 
