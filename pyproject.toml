@@ -1,6 +1,6 @@
 [project]
 name = "capsule-caffeine"
-version = "2.1.0"
+version = "2.1.1"
 description = "Scrape the caffeine content of Nespresso capsules"
 readme = "README.md"
 license = "MIT"
