@@ -1,0 +1,10 @@
+# Needs Python 3.13 or later: `exclude` errors below it.
+wrap = 80
+number = true
+exclude = [
+  "CHANGELOG.md",
+  "CLAUDE.md",
+  ".venv/**",
+  ".pytest_cache/**",
+  "node_modules/**",
+]

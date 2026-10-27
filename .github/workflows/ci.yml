@@ -1,21 +1,45 @@
-name: CI
+name: ci
 
 on:
-  pull_request:
   push:
-    # Both while the default branch is renamed from master to main.
-    branches: [master, main]
+    branches: [main]
+  pull_request:
 
 permissions:
   contents: read
 
+# Superseded runs are cancelled on pull requests only. On main every commit
+# keeps its own result, so a red one points at the commit that broke it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  check:
+  python:
+    uses: atdr/github-boilerplate/.github/workflows/python-ci.yml@v0.2.0
+    with:
+      # Every version requires-python in pyproject.toml admits.
+      python-versions: '["3.12", "3.13", "3.14"]'
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  # The one check branch protection requires from this workflow, so adding or
+  # dropping a Python version never touches the ruleset.
+  gate:
+    name: ci gate
+    # Not always(): a run superseded by a newer one is cancelled, and its gate
+    # would report a failure on the same commit the newer run is checking.
+    if: ${{ !cancelled() }}
+    needs: [python]
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-      - run: uv sync --locked
-      - run: uv run ruff check .
-      - run: uv run ruff format --check .
-      - run: uv run pytest
+      - name: Require every job to have passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          for result in $RESULTS; do
+            case "$result" in
+              failure|cancelled) echo "::error::a required job finished as $result"; exit 1 ;;
+            esac
+          done
