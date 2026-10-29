@@ -19,7 +19,7 @@ jobs:
     # `edited` also fires for closed and merged PRs, where the commit range no
     # longer resolves after a squash merge.
     if: github.event.pull_request.state == 'open'
-    uses: atdr/github-boilerplate/.github/workflows/conventional.yml@v0.2.0
+    uses: atdr/github-boilerplate/.github/workflows/conventional.yml@v0.2.3
 
   # The one check branch protection requires from this workflow. Requiring the
   # jobs above by name would tie the ruleset to job names inside another
