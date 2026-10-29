@@ -8,15 +8,19 @@ on:
 permissions:
   contents: read
 
-# Superseded runs are cancelled on pull requests only. On main every commit
-# keeps its own result, so a red one points at the commit that broke it.
+# Pull requests share a group per branch, so a new push cancels the run it
+# supersedes. Every other run gets a group of its own: GitHub keeps only one
+# pending run per group and drops the older for a newer, even with
+# cancel-in-progress false, so a shared group on main would leave commits
+# with no result. Each commit on main keeps its own, so a red one points at
+# the commit that broke it.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   python:
-    uses: atdr/github-boilerplate/.github/workflows/python-ci.yml@v0.2.0
+    uses: atdr/github-boilerplate/.github/workflows/python-ci.yml@v0.2.3
     with:
       # Every version requires-python in pyproject.toml admits.
       python-versions: '["3.12", "3.13", "3.14"]'

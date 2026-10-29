@@ -33,6 +33,14 @@ updates:
       interval: weekly
     commit-message:
       prefix: ci
+    # A new release waits out GitHub's default three days before Dependabot
+    # offers it, time for a compromised one to be caught and pulled. atdr's own
+    # actions skip the wait: there is no third party to wait on, and a
+    # boilerplate fix would otherwise reach callers days late.
+    cooldown:
+      default-days: 3
+      exclude:
+        - 'atdr/*'
     # Dependabot counts each reusable workflow file as its own dependency, so
     # one boilerplate release would open a PR per pinned file and leave the
     # pins on mixed versions between merges. Grouped, they move together.
