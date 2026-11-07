@@ -63,7 +63,7 @@ jobs:
         with:
           ref: ${{ needs.release-please.outputs.tag_name }}
           persist-credentials: false
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v7
       - run: uv sync --locked
       - run: uv run capsule-caffeine shortcut -o "Nespresso-Log-unsigned.shortcut"
       - env:
