@@ -20,10 +20,10 @@ concurrency:
 
 jobs:
   markdown:
-    uses: atdr/github-boilerplate/.github/workflows/markdown.yml@v0.3.1
+    uses: atdr/github-boilerplate/.github/workflows/markdown.yml@v0.4.0
 
   conventions:
-    uses: atdr/github-boilerplate/.github/workflows/conventions.yml@v0.3.1
+    uses: atdr/github-boilerplate/.github/workflows/conventions.yml@v0.4.0
 
   # The one check branch protection requires from this workflow.
   gate:
