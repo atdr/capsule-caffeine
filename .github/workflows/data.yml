@@ -35,6 +35,7 @@ jobs:
       changed: ${{ steps.diff.outputs.changed }}
       publish: ${{ steps.diff.outputs.publish }}
       ref: ${{ steps.ref.outputs.ref }}
+      ref_name: ${{ steps.ref.outputs.ref_name }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -47,6 +48,7 @@ jobs:
           ref=${ref:-$GITHUB_SHA}
           git checkout --quiet "$ref"
           echo "ref=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "ref_name=$ref" >> "$GITHUB_OUTPUT"
           echo "Building with $ref"
       - uses: astral-sh/setup-uv@v7
       - run: uv sync --locked
@@ -126,16 +128,24 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REF: ${{ needs.build.outputs.ref }}
+          REF_NAME: ${{ needs.build.outputs.ref_name }}
         run: |
           tag="data-$(date -u +%F)"
           for file in dist/*/capsules.json; do
             cp "$file" "$(basename "$(dirname "$file")")-capsules.json"
           done
+          # The tag cannot say which code built the data (see below), so the notes do.
+          printf '\nBuilt with %s (%s).\n' "$REF_NAME" "$REF" >> notes.md
           if gh release view "$tag" > /dev/null 2>&1; then
             gh release upload "$tag" ./*-capsules.json --clobber
             gh release edit "$tag" --notes-file notes.md
           else
             # Never "latest": that stays the newest code release.
-            gh release create "$tag" ./*-capsules.json --target "$REF" --latest=false \
+            # No --target, so the tag lands on the default branch. Tagging the
+            # release commit that built the data fails with HTTP 403 as soon as
+            # main's workflow files differ from that commit's: creating a ref
+            # there needs the `workflows` permission, which GITHUB_TOKEN cannot
+            # be granted.
+            gh release create "$tag" ./*-capsules.json --latest=false \
               --title "Data $(date -u +%F)" --notes-file notes.md
           fi
