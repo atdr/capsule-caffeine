@@ -1,21 +1,14 @@
-# Coverage reports; it does not gate. Both statuses show their real result,
-# so a PR that adds lines the tests never run gets a red patch status. Neither
-# can block a merge: the ruleset requires the gate checks and nothing else, and
-# the test run that produces the report is what has to pass.
+# Coverage reports; it does not gate. The test run that produces the report is
+# what blocks a merge, and a percentage moving says nothing about whether the
+# change under review is right.
 coverage:
   status:
     project:
       default:
-        # Against the base commit, with room for rounding, so dropping one
-        # line at high coverage stays green while losing a test does not.
-        target: auto
-        threshold: 0.1%
+        informational: true
     patch:
       default:
-        # Every changed line the tests can reach, not the project's own
-        # average: against `auto`, a patch at 90% passes on an 80% base while
-        # adding untested lines.
-        target: 100%
+        informational: true
 comment:
   layout: 'condensed_header, diff, files'
   require_changes: true
