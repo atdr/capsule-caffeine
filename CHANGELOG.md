@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2](https://github.com/atdr/capsule-caffeine/compare/v2.1.1...v2.1.2) (2026-11-13)
+
+
+### Bug Fixes
+
+* **deps:** Bump soupsieve from 3.0.4 to 4.0 ([#36](https://github.com/atdr/capsule-caffeine/issues/36)) ([30cbff4](https://github.com/atdr/capsule-caffeine/commit/30cbff4f96aa6e01157136c92901e4dd2fd0beee))
+
 ## [2.1.1](https://github.com/atdr/capsule-caffeine/compare/v2.1.0...v2.1.1) (2026-10-27)
 
 
