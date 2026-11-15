@@ -1,0 +1,19 @@
+name: auto-merge
+
+# Dependabot's patch and minor bumps merge themselves once every required check
+# passes; majors wait for review. See atdr/github-boilerplate's STANDARDS.md.
+on:
+  pull_request_target:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  dependabot:
+    uses: atdr/github-boilerplate/.github/workflows/dependabot-auto-merge.yml@v1.1.0
+    permissions:
+      contents: write
+      pull-requests: write

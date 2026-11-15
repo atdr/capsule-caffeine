@@ -11,6 +11,11 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # A new release waits three days before Dependabot offers it, time for a
+    # compromised one to be caught and pulled before patch and minor bumps
+    # auto-merge (auto-merge.yml). Security updates skip the wait.
+    cooldown:
+      default-days: 3
     commit-message:
       prefix: fix
       prefix-development: chore
