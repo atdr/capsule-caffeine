@@ -26,7 +26,32 @@ def test_extract_embedded_json_raises_when_the_component_is_missing():
     ("texts", "expected"),
     [
         (["125g (10 Capsules)<br>Per serving of Caffine is 140mg/230ml"], (140, None)),
-        (["Net weight 50g", "Approx. 60 mg"], (60, None)),
+        # No caffeine anchor: other mg figures on the page are not caffeine.
+        (["Net weight 50g", "Approx. 60 mg"], (None, None)),
+        (["Vitamin B12 0.6mg<br>Sodium 5mg"], (None, None)),
+        (["Serving 2 - 5mg"], (None, None)),
+        (["Sodium 2 - 5mg per serving"], (None, None)),
+        # Real sg Odacio and Bianco Doppio: a range alone in its section, no title.
+        (["Net Weight (for 10 capsules):", "108g", "130 - 200mg per cup"], (165, (130, 200))),
+        (["Made in Switzerland", "81mg - 130mg"], (106, (81, 130))),
+        (["Decaffeinated coffee with 3mg of sodium"], (None, None)),
+        (["Vitamin B6 1.4mg", "Per serving of caffeine is 80mg/40ml"], (80, None)),
+        (["Sodium 5mg", "CAFFEINE", "7mg - 80mg"], (44, (7, 80))),
+        # The real sg Caramello sections, with the figure after the CAFFEINE title.
+        (
+            [
+                "10 capsules of caramel flavoured roast and ground coffee for the "
+                "Nespresso system. Packaged in a protective atmosphere.",
+                "INGREDIENTS & ALLERGENS",
+                "Roast and ground coffee with natural caramel flavouring only",
+                "NET WEIGHT (FOR 10 CAPSULES)",
+                "47g",
+                "MADE IN SWITZERLAND BY NESTLÉ NESPRESSO S.A.",
+                "CAFFEINE",
+                "7mg - 80mg",
+            ],
+            (44, (7, 80)),
+        ),
         (["NET WEIGHT", "100g", "CAFFEINE", "120 – 300mg per cup"], (210, (120, 300))),
         (["CAFFEINE", "7mg - 80mg"], (44, (7, 80))),
         (["CAFFEINE", "125 - 312.5mg per cup"], (219, (125, 312.5))),

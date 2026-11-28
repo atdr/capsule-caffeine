@@ -21,13 +21,18 @@ LINES = {
 # and nz run the same site but give no caffeine values; uk, us, ca and ie run another site.
 LOCALES = ("tw", "sg")
 NUMBER = r"(\d+(?:\.\d+)?)"
+# Every pattern starts at the word caffeine (or tw's "Caffine"), so no other mg figure on
+# the page, such as a vitamin or sodium amount, can be read as the pod's caffeine. The
+# ingredients sections are joined first: sg puts the figure in the section after a
+# CAFFEINE title, tw in the sentence "Per serving of caffeine is 133mg/80ml".
+CAFFEINE_ANCHOR = r"\bcaff\w*\D{0,20}?"
 # sg gives a range: "120 – 300mg per cup", "7mg - 80mg".
-CAFFEINE_RANGE = re.compile(rf"{NUMBER}\s?(?:mg)?\s*[-–—]\s*{NUMBER}\s?mg", re.IGNORECASE)
-# tw says "Per serving of caffeine is 133mg/80ml"; older pages just "60 mg".
-CAFFEINE_PATTERNS = (
-    re.compile(rf"caff\w*\D{{0,20}}?{NUMBER}\s?mg", re.IGNORECASE),
-    re.compile(rf"{NUMBER}\s?mg", re.IGNORECASE),
-)
+MG_RANGE = rf"{NUMBER}\s?(?:mg)?\s*[-–—]\s*{NUMBER}\s?mg"
+CAFFEINE_RANGE = re.compile(CAFFEINE_ANCHOR + MG_RANGE, re.IGNORECASE)
+# A few sg pages drop the CAFFEINE title and end with a section that is only the range,
+# such as "130 - 200mg per cup". That is accepted only as a whole section by itself.
+RANGE_SECTION = re.compile(rf"\s*{MG_RANGE}(?:\s*per cup)?\s*", re.IGNORECASE)
+CAFFEINE_MG = re.compile(rf"{CAFFEINE_ANCHOR}{NUMBER}\s?mg", re.IGNORECASE)
 # Product page images are 2000px; the image server resizes them on request.
 FALLBACK_IMAGE_WIDTH = 200
 ZERO_WIDTH = re.compile(r"[\u200b-\u200d\ufeff]")
@@ -108,13 +113,16 @@ def parse_caffeine(product: dict) -> tuple[int | None, tuple[float, float] | Non
 
     For a range the single value is its midpoint.
     """
-    text = " ".join(i.get("text", "") for i in product.get("ingredients", []))
-    if match := CAFFEINE_RANGE.search(text):
+    sections = [i.get("text", "") for i in product.get("ingredients") or []]
+    text = " ".join(sections)
+    match = CAFFEINE_RANGE.search(text) or next(
+        filter(None, map(RANGE_SECTION.fullmatch, sections)), None
+    )
+    if match:
         low, high = sorted((_number(match.group(1)), _number(match.group(2))))
         return _round((low + high) / 2), (low, high)
-    for pattern in CAFFEINE_PATTERNS:
-        if match := pattern.search(text):
-            return _round(float(match.group(1))), None
+    if match := CAFFEINE_MG.search(text):
+        return _round(float(match.group(1))), None
     return None, None
 
 
