@@ -52,6 +52,23 @@ def test_extract_embedded_json_raises_when_the_component_is_missing():
             ],
             (44, (7, 80)),
         ),
+        # The real tw Altissio Decaffeinato sections: "4g" is a typo for 4 mg.
+        (
+            [
+                "10 capsules of roast and ground coffee for the Nespresso Vertuo "
+                "system.<br>INGREDIENTS: Roast and ground coffee only.",
+                "NET WEIGHT",
+                "70g (7g*10 capsule)<br>Per serving of caffeine is 4g/40ml",
+                "Producer",
+                "MADE IN SWITZERLAND BY NESTLÉ NESPRESSO S.A.",
+            ],
+            (4, None),
+        ),
+        # A gram figure is read as mg only when it is a single digit per serving.
+        (["Per serving of caffeine is 40g/40ml"], (None, None)),
+        (["Per serving of caffeine is 4000g/40ml"], (None, None)),
+        (["Per serving of caffeine is 4g"], (None, None)),
+        (["NET WEIGHT 7g/40ml"], (None, None)),
         (["NET WEIGHT", "100g", "CAFFEINE", "120 – 300mg per cup"], (210, (120, 300))),
         (["CAFFEINE", "7mg - 80mg"], (44, (7, 80))),
         (["CAFFEINE", "125 - 312.5mg per cup"], (219, (125, 312.5))),

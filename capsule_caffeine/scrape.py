@@ -33,6 +33,12 @@ CAFFEINE_RANGE = re.compile(CAFFEINE_ANCHOR + MG_RANGE, re.IGNORECASE)
 # such as "130 - 200mg per cup". That is accepted only as a whole section by itself.
 RANGE_SECTION = re.compile(rf"\s*{MG_RANGE}(?:\s*per cup)?\s*", re.IGNORECASE)
 CAFFEINE_MG = re.compile(rf"{CAFFEINE_ANCHOR}{NUMBER}\s?mg", re.IGNORECASE)
+# tw Altissio Decaffeinato says "caffeine is 4g/40ml", a typo for mg. Only a single digit
+# gram figure per serving is read as mg: 4 g of caffeine is not a plausible reading, and a
+# figure with more digits is left unread rather than guessed at.
+CAFFEINE_GRAM_TYPO = re.compile(
+    rf"{CAFFEINE_ANCHOR}(\d)\s?g\s*/\s*\d+(?:\.\d+)?\s?ml", re.IGNORECASE
+)
 # Product page images are 2000px; the image server resizes them on request.
 FALLBACK_IMAGE_WIDTH = 200
 ZERO_WIDTH = re.compile(r"[\u200b-\u200d\ufeff]")
@@ -121,8 +127,9 @@ def parse_caffeine(product: dict) -> tuple[int | None, tuple[float, float] | Non
     if match:
         low, high = sorted((_number(match.group(1)), _number(match.group(2))))
         return _round((low + high) / 2), (low, high)
-    if match := CAFFEINE_MG.search(text):
-        return _round(float(match.group(1))), None
+    for pattern in (CAFFEINE_MG, CAFFEINE_GRAM_TYPO):
+        if match := pattern.search(text):
+            return _round(float(match.group(1))), None
     return None, None
 
 
