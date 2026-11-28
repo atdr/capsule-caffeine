@@ -1,5 +1,6 @@
 from capsule_caffeine.document import market_document
-from capsule_caffeine.merge import MergedPod, disagrees, merge_markets, pod_key
+from capsule_caffeine.merge import MergedPod, canonical_range, disagrees, merge_markets, pod_key
+from capsule_caffeine.promotions import load_range_map
 from capsule_caffeine.scrape import Pod, Range, scrape_market
 from capsule_caffeine.validate import problems, schema_problems
 
@@ -124,3 +125,19 @@ def test_problems_flags_thin_or_caffeine_free_data():
     ]
     doc["schema"] = 1
     assert problems(doc) == ["schema: 2 was expected"]
+
+
+def test_every_sg_festive_slug_folds_into_limited_edition():
+    range_map = load_range_map()
+    live = {
+        "Original": ["capsule-range-festive", "capsules-range-festive"],
+        "Vertuo": [
+            "capsule-range-festive-vertuo",
+            "capsule-range-festive-vl",
+            "capsule-range-festive2026-vl",
+        ],
+    }
+    for line, slugs in live.items():
+        for slug in slugs:
+            festive = Range(slug, "Festive Coffees")
+            assert canonical_range(line, festive, "sg", range_map) == "Limited Edition"
