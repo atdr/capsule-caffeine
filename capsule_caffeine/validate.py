@@ -15,9 +15,15 @@ def load_schema() -> dict:
 
 
 def schema_problems(document: dict) -> list[str]:
+    # Without a format checker jsonschema treats `format` as an annotation only. It also skips a
+    # format whose helper library is missing (rfc3339-validator for date-time, rfc3986-validator
+    # for uri), so both are declared dependencies and tests cover each format.
+    validator = Draft202012Validator(
+        load_schema(), format_checker=Draft202012Validator.FORMAT_CHECKER
+    )
     return [
         f"{'/'.join(map(str, e.absolute_path)) or '(root)'}: {e.message}"
-        for e in Draft202012Validator(load_schema()).iter_errors(document)
+        for e in validator.iter_errors(document)
     ]
 
 

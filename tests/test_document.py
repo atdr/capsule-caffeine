@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 from capsule_caffeine.document import market_document
 from capsule_caffeine.merge import MergedPod, disagrees, merge_markets, pod_key
 from capsule_caffeine.scrape import Pod, Range, scrape_market
@@ -7,8 +9,9 @@ NOW = "2026-10-24T12:00:00Z"
 
 
 def pod(name, caffeine_mg=60, caffeine_range_mg=None):
+    slug = quote(name)
     return Pod(
-        name, "1", caffeine_mg, f"https://x/{name}.png", f"https://x/{name}", caffeine_range_mg
+        name, "1", caffeine_mg, f"https://x/{slug}.png", f"https://x/{slug}", caffeine_range_mg
     )
 
 
@@ -124,3 +127,45 @@ def test_problems_flags_thin_or_caffeine_free_data():
     ]
     doc["schema"] = 1
     assert problems(doc) == ["schema: 2 was expected"]
+
+
+def format_document():
+    return {
+        "schema": 2,
+        "generated_at": NOW,
+        "scraper": "x",
+        "source": {"site": "s", "language": "en", "locales": ["tw"]},
+        "lines": {
+            "Original": {
+                "R": {
+                    "P": {
+                        "caffeine_mg": 1,
+                        "image_url": "https://x/p.png",
+                        "page_url": "https://x/p",
+                    }
+                }
+            }
+        },
+    }
+
+
+def test_schema_accepts_well_formed_formats():
+    assert schema_problems(format_document()) == []
+
+
+def test_schema_rejects_bad_date_time():
+    doc = format_document()
+    doc["generated_at"] = "yesterday"
+
+    assert any(p.startswith("generated_at:") for p in schema_problems(doc))
+
+
+def test_schema_rejects_bad_uri():
+    doc = format_document()
+    pod = doc["lines"]["Original"]["R"]["P"]
+    pod["image_url"] = "nope"
+    pod["page_url"] = "not a url"
+
+    found = schema_problems(doc)
+    assert any(p.endswith("image_url: 'nope' is not a 'uri'") for p in found)
+    assert any("page_url" in p for p in found)
