@@ -31,9 +31,10 @@ def test_extract_embedded_json_raises_when_the_component_is_missing():
         (["Vitamin B12 0.6mg<br>Sodium 5mg"], (None, None)),
         (["Serving 2 - 5mg"], (None, None)),
         (["Sodium 2 - 5mg per serving"], (None, None)),
-        # Real sg Odacio and Bianco Doppio: a range alone in its section, no title.
-        (["Net Weight (for 10 capsules):", "108g", "130 - 200mg per cup"], (165, (130, 200))),
-        (["Made in Switzerland", "81mg - 130mg"], (106, (81, 130))),
+        # Only the word caffeine itself is an anchor.
+        (["Caffeinated coffee, sodium 5mg"], (None, None)),
+        (["CaffeineContent 5mg"], (None, None)),
+        (["CAFFEINE: 60 mg"], (60, None)),
         (["Decaffeinated coffee with 3mg of sodium"], (None, None)),
         (["Vitamin B6 1.4mg", "Per serving of caffeine is 80mg/40ml"], (80, None)),
         (["Sodium 5mg", "CAFFEINE", "7mg - 80mg"], (44, (7, 80))),
@@ -77,6 +78,60 @@ def test_extract_embedded_json_raises_when_the_component_is_missing():
 )
 def test_parse_caffeine(texts, expected):
     assert parse_caffeine({"ingredients": [{"text": t} for t in texts]}) == expected
+
+
+def typed(*sections: tuple[str, str]) -> dict:
+    """A product whose ingredients sections carry their kind, as real pages do."""
+    return {"ingredients": [{"type": {"code": c}, "text": t} for c, t in sections]}
+
+
+T, D = "TITLE", "DESCRIPTION"
+
+
+@pytest.mark.parametrize(
+    ("product", "expected"),
+    [
+        # The real sg Odacio and Bianco Doppio endings: a range with no heading.
+        (
+            typed(
+                (T, "Net Weight (for 10 capsules):"),
+                (D, "108g"),
+                (T, "Packaged in a protective atmosphere."),
+                (D, "Made in Switzerland"),
+                (D, "130 - 200mg per cup"),
+            ),
+            (165, (130, 200)),
+        ),
+        (
+            typed(
+                (T, "Packaged in a protective atmosphere."),
+                (D, "Made in Switzerland"),
+                (D, "81mg - 130mg"),
+            ),
+            (106, (81, 130)),
+        ),
+        # A range under another heading belongs to that heading.
+        (typed((T, "SODIUM"), (D, "2 - 5mg")), (None, None)),
+        (typed((D, "2 - 5mg")), (None, None)),
+        # Untyped sections give no heading context, so the range is not read.
+        ({"ingredients": [{"text": "Made in Switzerland"}, {"text": "2 - 5mg"}]}, (None, None)),
+        # Any caffeine figure wins over a bare range.
+        (
+            typed(
+                (D, "Made in Switzerland"),
+                (D, "2 - 5mg"),
+                (D, "Per serving of caffeine is 80mg/40ml"),
+            ),
+            (80, None),
+        ),
+        (
+            typed((T, "SODIUM"), (D, "2 - 5mg"), (D, "Per serving of caffeine is 80mg/40ml")),
+            (80, None),
+        ),
+    ],
+)
+def test_parse_caffeine_unlabelled_range(product, expected):
+    assert parse_caffeine(product) == expected
 
 
 def test_tidy_name():

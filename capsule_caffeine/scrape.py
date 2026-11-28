@@ -4,6 +4,7 @@ import logging
 import re
 import time
 from dataclasses import dataclass, field
+from itertools import pairwise
 
 import requests
 
@@ -25,12 +26,16 @@ NUMBER = r"(\d+(?:\.\d+)?)"
 # the page, such as a vitamin or sodium amount, can be read as the pod's caffeine. The
 # ingredients sections are joined first: sg puts the figure in the section after a
 # CAFFEINE title, tw in the sentence "Per serving of caffeine is 133mg/80ml".
-CAFFEINE_ANCHOR = r"\bcaff\w*\D{0,20}?"
+# The word must stand alone: not "decaffeinated", "caffeinated" or "CaffeineContent".
+CAFFEINE_ANCHOR = r"\bcaff?e?ine\b\D{0,20}?"
 # sg gives a range: "120 – 300mg per cup", "7mg - 80mg".
 MG_RANGE = rf"{NUMBER}\s?(?:mg)?\s*[-–—]\s*{NUMBER}\s?mg"
 CAFFEINE_RANGE = re.compile(CAFFEINE_ANCHOR + MG_RANGE, re.IGNORECASE)
 # A few sg pages drop the CAFFEINE title and end with a section that is only the range,
-# such as "130 - 200mg per cup". That is accepted only as a whole section by itself.
+# such as "130 - 200mg per cup", straight after the "Made in Switzerland" description.
+# That is the last resort: it is read only when no caffeine pattern matched, only as a
+# whole section, and only when that section has no heading of its own, since a range
+# under a title such as SODIUM is that nutrient's.
 RANGE_SECTION = re.compile(rf"\s*{MG_RANGE}(?:\s*per cup)?\s*", re.IGNORECASE)
 CAFFEINE_MG = re.compile(rf"{CAFFEINE_ANCHOR}{NUMBER}\s?mg", re.IGNORECASE)
 # tw Altissio Decaffeinato says "caffeine is 4g/40ml", a typo for mg. Only a single digit
@@ -119,18 +124,29 @@ def parse_caffeine(product: dict) -> tuple[int | None, tuple[float, float] | Non
 
     For a range the single value is its midpoint.
     """
-    sections = [i.get("text", "") for i in product.get("ingredients") or []]
-    text = " ".join(sections)
-    match = CAFFEINE_RANGE.search(text) or next(
-        filter(None, map(RANGE_SECTION.fullmatch, sections)), None
-    )
-    if match:
-        low, high = sorted((_number(match.group(1)), _number(match.group(2))))
-        return _round((low + high) / 2), (low, high)
+    sections = product.get("ingredients") or []
+    text = " ".join(i.get("text", "") for i in sections)
+    if match := CAFFEINE_RANGE.search(text):
+        return _range(match)
     for pattern in (CAFFEINE_MG, CAFFEINE_GRAM_TYPO):
         if match := pattern.search(text):
             return _round(float(match.group(1))), None
+    for before, section in pairwise(sections):
+        if _section_type(before) == "DESCRIPTION" and (
+            match := RANGE_SECTION.fullmatch(section.get("text", ""))
+        ):
+            return _range(match)
     return None, None
+
+
+def _section_type(section: dict) -> str | None:
+    """`TITLE` or `DESCRIPTION`, the kind of an ingredients section, if the page says."""
+    return (section.get("type") or {}).get("code")
+
+
+def _range(match: re.Match) -> tuple[int, tuple[float, float]]:
+    low, high = sorted((_number(match.group(1)), _number(match.group(2))))
+    return _round((low + high) / 2), (low, high)
 
 
 def image_url(item: dict, product: dict) -> str:
