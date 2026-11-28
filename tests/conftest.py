@@ -88,6 +88,6 @@ def original_tw() -> FakeSession:
             f"{DOMAIN}/p/ristretto": product_page(
                 "Ristretto", ["Net weight", "Per serving of caffeine is 120mg/25ml"]
             ),
-            f"{DOMAIN}/p/arpeggio": product_page("ARPEGGIO", ["Approx. 60 mg per cup"]),
+            f"{DOMAIN}/p/arpeggio": product_page("ARPEGGIO", ["Caffeine approx. 60 mg per cup"]),
         }
     )

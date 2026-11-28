@@ -26,7 +26,50 @@ def test_extract_embedded_json_raises_when_the_component_is_missing():
     ("texts", "expected"),
     [
         (["125g (10 Capsules)<br>Per serving of Caffine is 140mg/230ml"], (140, None)),
-        (["Net weight 50g", "Approx. 60 mg"], (60, None)),
+        # No caffeine anchor: other mg figures on the page are not caffeine.
+        (["Net weight 50g", "Approx. 60 mg"], (None, None)),
+        (["Vitamin B12 0.6mg<br>Sodium 5mg"], (None, None)),
+        (["Serving 2 - 5mg"], (None, None)),
+        (["Sodium 2 - 5mg per serving"], (None, None)),
+        # Only the word caffeine itself is an anchor.
+        (["Caffeinated coffee, sodium 5mg"], (None, None)),
+        (["CaffeineContent 5mg"], (None, None)),
+        (["CAFFEINE: 60 mg"], (60, None)),
+        (["Decaffeinated coffee with 3mg of sodium"], (None, None)),
+        (["Vitamin B6 1.4mg", "Per serving of caffeine is 80mg/40ml"], (80, None)),
+        (["Sodium 5mg", "CAFFEINE", "7mg - 80mg"], (44, (7, 80))),
+        # The real sg Caramello sections, with the figure after the CAFFEINE title.
+        (
+            [
+                "10 capsules of caramel flavoured roast and ground coffee for the "
+                "Nespresso system. Packaged in a protective atmosphere.",
+                "INGREDIENTS & ALLERGENS",
+                "Roast and ground coffee with natural caramel flavouring only",
+                "NET WEIGHT (FOR 10 CAPSULES)",
+                "47g",
+                "MADE IN SWITZERLAND BY NESTLÉ NESPRESSO S.A.",
+                "CAFFEINE",
+                "7mg - 80mg",
+            ],
+            (44, (7, 80)),
+        ),
+        # The real tw Altissio Decaffeinato sections: "4g" is a typo for 4 mg.
+        (
+            [
+                "10 capsules of roast and ground coffee for the Nespresso Vertuo "
+                "system.<br>INGREDIENTS: Roast and ground coffee only.",
+                "NET WEIGHT",
+                "70g (7g*10 capsule)<br>Per serving of caffeine is 4g/40ml",
+                "Producer",
+                "MADE IN SWITZERLAND BY NESTLÉ NESPRESSO S.A.",
+            ],
+            (4, None),
+        ),
+        # A gram figure is read as mg only when it is a single digit per serving.
+        (["Per serving of caffeine is 40g/40ml"], (None, None)),
+        (["Per serving of caffeine is 4000g/40ml"], (None, None)),
+        (["Per serving of caffeine is 4g"], (None, None)),
+        (["NET WEIGHT 7g/40ml"], (None, None)),
         (["NET WEIGHT", "100g", "CAFFEINE", "120 – 300mg per cup"], (210, (120, 300))),
         (["CAFFEINE", "7mg - 80mg"], (44, (7, 80))),
         (["CAFFEINE", "125 - 312.5mg per cup"], (219, (125, 312.5))),
@@ -35,6 +78,60 @@ def test_extract_embedded_json_raises_when_the_component_is_missing():
 )
 def test_parse_caffeine(texts, expected):
     assert parse_caffeine({"ingredients": [{"text": t} for t in texts]}) == expected
+
+
+def typed(*sections: tuple[str, str]) -> dict:
+    """A product whose ingredients sections carry their kind, as real pages do."""
+    return {"ingredients": [{"type": {"code": c}, "text": t} for c, t in sections]}
+
+
+T, D = "TITLE", "DESCRIPTION"
+
+
+@pytest.mark.parametrize(
+    ("product", "expected"),
+    [
+        # The real sg Odacio and Bianco Doppio endings: a range with no heading.
+        (
+            typed(
+                (T, "Net Weight (for 10 capsules):"),
+                (D, "108g"),
+                (T, "Packaged in a protective atmosphere."),
+                (D, "Made in Switzerland"),
+                (D, "130 - 200mg per cup"),
+            ),
+            (165, (130, 200)),
+        ),
+        (
+            typed(
+                (T, "Packaged in a protective atmosphere."),
+                (D, "Made in Switzerland"),
+                (D, "81mg - 130mg"),
+            ),
+            (106, (81, 130)),
+        ),
+        # A range under another heading belongs to that heading.
+        (typed((T, "SODIUM"), (D, "2 - 5mg")), (None, None)),
+        (typed((D, "2 - 5mg")), (None, None)),
+        # Untyped sections give no heading context, so the range is not read.
+        ({"ingredients": [{"text": "Made in Switzerland"}, {"text": "2 - 5mg"}]}, (None, None)),
+        # Any caffeine figure wins over a bare range.
+        (
+            typed(
+                (D, "Made in Switzerland"),
+                (D, "2 - 5mg"),
+                (D, "Per serving of caffeine is 80mg/40ml"),
+            ),
+            (80, None),
+        ),
+        (
+            typed((T, "SODIUM"), (D, "2 - 5mg"), (D, "Per serving of caffeine is 80mg/40ml")),
+            (80, None),
+        ),
+    ],
+)
+def test_parse_caffeine_unlabelled_range(product, expected):
+    assert parse_caffeine(product) == expected
 
 
 def test_tidy_name():
